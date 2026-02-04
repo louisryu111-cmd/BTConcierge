@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>실전형 모바일 안면 인식</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 얼굴 인식 라이브러리 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow-x: hidden; }
+        .video-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3/4;
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        #webcam, #overlay-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .mirror { transform: scaleX(-1); }
+        .scanning-bar {
+            position: absolute;
+            width: 100%; height: 4px;
+            background: linear-gradient(to bottom, transparent, #3b82f6, transparent);
+            box-shadow: 0 0 20px #3b82f6;
+            z-index: 20;
+            top: 0;
+            animation: scan 2s infinite linear;
+            display: none;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex flex-col">
+
+    <header class="p-6 bg-slate-900/50 backdrop-blur-xl border-b border-white/10">
+        <div class="flex justify-between items-end">
+            <div>
+                <p class="text-blue-400 text-xs font-bold tracking-widest uppercase">System v2.0</p>
+                <h1 class="text-2xl font-black">AI Face Scanner</h1>
+            </div>
+            <div id="status-dot" class="flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                MODELS LOADING
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 p-4 space-y-6 max-w-md mx-auto w-full">
+        <!-- 카메라 뷰어 -->
+        <div class="video-container border border-white/10">
+            <video id="webcam" autoplay playsinline muted></video>
+            <canvas id="overlay-canvas"></canvas>
+            <div id="scanner" class="scanning-bar"></div>
+            
+            <!-- 로딩 및 안내 레이어 -->
+            <div id="ui-overlay" class="absolute inset-0 z-30 bg-slate-900 flex flex-col items-center justify-center p-8 text-center transition-opacity duration-500">
+                <div id="main-loader" class="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h3 id="overlay-title" class="text-lg font-bold">모델 초기화 중...</h3>
+                <p id="overlay-desc" class="text-sm text-slate-400 mt-2">안면 인식 AI 엔진을 구동하고 있습니다.</p>
+                <button id="retry-btn" class="hidden mt-6 px-6 py-2 bg-white text-black rounded-full font-bold text-sm">다시 시도</button>
+            </div>
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="flex gap-3">
+            <button id="start-btn" disabled class="flex-1 bg-blue-600 disabled:bg-slate-800 py-4 rounded-2xl font-bold shadow-xl active:scale-95 transition-all">
+                스캔 시작
+            </button>
+            <button id="switch-btn" class="w-16 bg-slate-800 rounded-2xl flex items-center justify-center active:scale-95 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- 인식 결과 섹션 -->
+        <div id="result-panel" class="bg-white/5 rounded-3xl p-6 border border-white/10 hidden">
+            <div class="flex items-center gap-5">
+                <div class="relative">
+                    <img id="db-photo" src="" class="w-20 h-20 rounded-2xl object-cover bg-slate-800 border-2 border-blue-500/50">
+                    <div class="absolute -bottom-2 -right-2 bg-blue-500 rounded-full p-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <h2 id="user-name" class="text-2xl font-bold">---</h2>
+                    <p id="user-dept" class="text-blue-400 text-sm font-medium tracking-wide italic">---</p>
+                    <p id="user-id" class="text-[10px] text-slate-500 mt-1 font-mono uppercase tracking-tighter">ID: ---</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 로그 -->
+        <div class="bg-black/20 rounded-2xl p-4 border border-white/5">
+            <div id="log" class="text-[10px] font-mono text-slate-500 h-24 overflow-y-auto space-y-1">
+                <div>> Initializing Neural Network...</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 1. 설정 (구글 시트 URL 및 사진 열 인덱스)
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1Nm-cjEZS-Ob-1FDMItiCxHVes4Yknkep/export?format=csv";
+        
+        let labeledDescriptors = []; // 얼굴 특징점 저장소
+        let faceMatcher = null;
+        let isProcessing = false;
+        let currentFacingMode = 'user';
+
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('overlay-canvas');
+        const logEl = document.getElementById('log');
+
+        function addLog(m) {
+            const d = document.createElement('div');
+            d.textContent = `> ${m}`;
+            logEl.appendChild(d);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // 2. 모델 로드 (face-api.js)
+        async function initAI() {
+            try {
+                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                ]);
+                addLog("AI Models Loaded.");
+                loadCloudData();
+            } catch (err) {
+                addLog("Model Load Failed: " + err.message);
+                document.getElementById('overlay-title').textContent = "AI 모델 로드 실패";
+                document.getElementById('retry-btn').classList.remove('hidden');
+            }
+        }
+
+        // 3. 구글 시트에서 사진 데이터 가져오기
+        async function loadCloudData() {
+            try {
+                addLog("Fetching Cloud Database...");
+                const res = await fetch(SHEET_CSV_URL);
+                const data = await res.text();
+                const rows = data.split('\n').slice(1); // 헤더 제외
+                
+                const users = rows.map(r => {
+                    const cols = r.split(',').map(c => c.trim());
+                    return {
+                        id: cols[0],
+                        name: cols[1],
+                        dept: cols[2],
+                        photoUrl: cols[3] // 4번째 열에 사진 URL이 있다고 가정
+                    };
+                }).filter(u => u.photoUrl);
+
+                // 각 유저의 사진에서 얼굴 특징 추출 (미리 학습)
+                addLog(`Processing ${users.length} user photos...`);
+                labeledDescriptors = await Promise.all(users.map(async user => {
+                    try {
+                        const img = await faceapi.fetchImage(user.photoUrl);
+                        const fullDesc = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                        if (fullDesc) {
+                            addLog(`Learned: ${user.name}`);
+                            return new faceapi.LabeledFaceDescriptors(
+                                `${user.name}|${user.dept}|${user.id}|${user.photoUrl}`, 
+                                [fullDesc.descriptor]
+                            );
+                        }
+                    } catch (e) {
+                        addLog(`Skip ${user.name}: Invalid Image URL`);
+                    }
+                    return null;
+                }));
+
+                labeledDescriptors = labeledDescriptors.filter(d => d !== null);
+                
+                if (labeledDescriptors.length > 0) {
+                    faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6); // 임계값 0.6
+                    document.getElementById('ui-overlay').classList.add('opacity-0');
+                    setTimeout(() => document.getElementById('ui-overlay').classList.add('hidden'), 500);
+                    document.getElementById('start-btn').disabled = false;
+                    document.getElementById('status-dot').innerHTML = '<span class="w-2 h-2 bg-emerald-500 rounded-full"></span> SYSTEM READY';
+                    addLog("System Ready for Scanning.");
+                } else {
+                    throw new Error("No valid face data in Sheet");
+                }
+            } catch (err) {
+                addLog("Cloud Data Error: " + err.message);
+                document.getElementById('overlay-title').textContent = "데이터 연동 실패";
+                document.getElementById('overlay-desc').textContent = "시트의 사진 URL을 확인해주세요.";
+            }
+        }
+
+        // 4. 카메라 제어
+        async function startCamera() {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(t => t.stop());
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: currentFacingMode, width: 720 }
+                });
+                video.srcObject = stream;
+                video.classList.toggle('mirror', currentFacingMode === 'user');
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    document.getElementById('scanner').style.display = 'block';
+                    runFaceDetection();
+                };
+            } catch (err) {
+                alert("카메라 권한을 확인하세요.");
+            }
+        }
+
+        // 5. 실시간 얼굴 인식 및 대조
+        async function runFaceDetection() {
+            const displaySize = { width: video.videoWidth, height: video.videoHeight };
+            faceapi.matchDimensions(canvas, displaySize);
+
+            setInterval(async () => {
+                if (isProcessing) return;
+                
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                    .withFaceLandmarks()
+                    .withFaceDescriptors();
+                
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                resizedDetections.forEach(d => {
+                    const bestMatch = faceMatcher.findBestMatch(d.descriptor);
+                    
+                    // 화면에 박스 그리기
+                    const box = d.detection.box;
+                    const drawBox = new faceapi.draw.DrawBox(box, { 
+                        label: bestMatch.label.split('|')[0], 
+                        boxColor: bestMatch.label.includes('unknown') ? 'red' : '#3b82f6' 
+                    });
+                    drawBox.draw(canvas);
+
+                    // 일치하는 경우 결과창 표시
+                    if (!bestMatch.label.includes('unknown')) {
+                        showResult(bestMatch.label);
+                    }
+                });
+            }, 500);
+        }
+
+        function showResult(labelData) {
+            const [name, dept, id, url] = labelData.split('|');
+            document.getElementById('result-panel').classList.remove('hidden');
+            document.getElementById('user-name').textContent = name;
+            document.getElementById('user-dept').textContent = dept;
+            document.getElementById('user-id').textContent = `ID: ${id}`;
+            document.getElementById('db-photo').src = url;
+            
+            // 시각 효과
+            document.getElementById('result-panel').classList.add('ring-2', 'ring-blue-500');
+            setTimeout(() => document.getElementById('result-panel').classList.remove('ring-2', 'ring-blue-500'), 1000);
+        }
+
+        // 이벤트 바인딩
+        document.getElementById('start-btn').addEventListener('click', startCamera);
+        document.getElementById('switch-btn').addEventListener('click', () => {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            startCamera();
+        });
+        document.getElementById('retry-btn').addEventListener('click', () => location.reload());
+
+        // 초기 실행
+        window.onload = initAI;
+    </script>
+</body>
+</html>
