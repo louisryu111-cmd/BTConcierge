@@ -13,7 +13,7 @@
         body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--banyan-dark); color: #ffffff; overflow-x: hidden; }
         .serif { font-family: 'Bodoni Moda', serif; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(197, 160, 89, 0.25); }
-        .video-container { position: relative; width: 100%; aspect-ratio: 4/5; border-radius: 3.5rem; overflow: hidden; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7); border: 1px solid rgba(197, 160, 89, 0.2); }
+        .video-container { position: relative; width: 100%; border-radius: 2.5rem; overflow: hidden; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7); border: 1px solid rgba(197, 160, 89, 0.2); }
         #webcam, #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
         .btn-premium { background: linear-gradient(135deg, #c5a059 0%, #a38141 100%); color: #000; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-premium:disabled { opacity: 0.2; transform: scale(0.98); }
@@ -35,10 +35,10 @@
         </div>
     </header>
 
-    <main class="flex-1 px-6 max-w-lg mx-auto w-full pb-10 space-y-6">
+    <main class="flex-1 px-6 max-w-5xl mx-auto w-full pb-10 space-y-6">
         
         <!-- Login Section -->
-        <div id="login-panel" class="glass-panel rounded-[3.5rem] p-12 text-center space-y-10 mt-6">
+        <div id="login-panel" class="glass-panel max-w-lg mx-auto rounded-[3.5rem] p-12 text-center space-y-10 mt-6">
             <div class="space-y-2">
                 <div class="serif text-5xl text-[#c5a059] font-light italic">Access</div>
                 <div class="h-px w-12 bg-[#c5a059]/30 mx-auto"></div>
@@ -52,52 +52,66 @@
         </div>
 
         <!-- Main Workspace -->
-        <div id="app-panel" class="hidden space-y-6 animate-in fade-in duration-1000">
-            <div class="video-container">
-                <video id="webcam" autoplay playsinline muted></video>
-                <canvas id="overlay"></canvas>
-                
-                <!-- Loading State -->
-                <div id="loading-overlay" class="absolute inset-0 bg-[#0a0c10] flex flex-col items-center justify-center text-center">
-                    <div class="w-16 h-16 border-t-2 border-[#c5a059] rounded-full animate-spin mb-6"></div>
-                    <p class="serif text-sm text-[#c5a059] tracking-[0.3em] uppercase">Syncing Security</p>
-                    <p id="sync-detail" class="text-[9px] text-slate-600 mt-4 uppercase tracking-widest font-mono italic">Initializing Face-AI...</p>
-                </div>
-            </div>
-
-            <!-- Controls -->
-            <div class="grid grid-cols-4 gap-3">
-                <button id="btn-start" disabled class="col-span-3 btn-premium py-5 rounded-full font-bold text-[11px] tracking-[0.2em] uppercase">시스템 가동</button>
-                <button id="btn-next-camera" title="카메라 전환" class="col-span-1 bg-white/5 border border-[#c5a059]/30 rounded-full flex items-center justify-center text-[#c5a059] active:scale-90 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Member Info Card -->
-            <div id="result-box" class="hidden glass-panel rounded-[3rem] p-8 animate-in slide-in-from-bottom-4 duration-500">
-                <div class="flex items-center gap-6">
-                    <div class="relative">
-                        <img id="user-img" src="" class="w-24 h-24 rounded-full object-cover border-2 border-[#c5a059]/40 p-1.5 bg-black/40">
-                        <div class="absolute inset-0 rounded-full border border-[#c5a059]/20 animate-pulse"></div>
-                    </div>
-                    <div class="space-y-1">
-                        <div class="serif text-[10px] text-[#c5a059] tracking-widest uppercase">Verified Member</div>
-                        <div id="user-name" class="text-3xl font-light tracking-tight text-white">---</div>
-                        <div id="user-dept" class="text-slate-500 text-xs font-light">---</div>
+        <div id="app-panel" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-1000">
+            
+            <!-- Left Column: Camera -->
+            <div class="space-y-4">
+                <!-- 카메라 비율을 4:3으로 조정하고 크기를 줄임 -->
+                <div class="video-container aspect-video lg:aspect-[4/3]">
+                    <video id="webcam" autoplay playsinline muted></video>
+                    <canvas id="overlay"></canvas>
+                    
+                    <!-- Loading State -->
+                    <div id="loading-overlay" class="absolute inset-0 bg-[#0a0c10] flex flex-col items-center justify-center text-center">
+                        <div class="w-16 h-16 border-t-2 border-[#c5a059] rounded-full animate-spin mb-6"></div>
+                        <p class="serif text-sm text-[#c5a059] tracking-[0.3em] uppercase">Syncing Security</p>
+                        <p id="sync-detail" class="text-[9px] text-slate-600 mt-4 uppercase tracking-widest font-mono italic">Initializing Face-AI...</p>
                     </div>
                 </div>
+
+                <!-- Controls -->
+                <div class="grid grid-cols-4 gap-3">
+                    <button id="btn-start" disabled class="col-span-3 btn-premium py-4 rounded-full font-bold text-[11px] tracking-[0.2em] uppercase">시스템 가동</button>
+                    <button id="btn-next-camera" title="카메라 전환" class="col-span-1 bg-white/5 border border-[#c5a059]/30 rounded-full flex items-center justify-center text-[#c5a059] active:scale-90 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
-            <!-- Log Console -->
-            <div class="bg-black/40 rounded-[2rem] p-6 border border-white/5">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="serif text-[9px] text-[#c5a059] tracking-[0.2em] uppercase opacity-70">Security Logs</span>
-                    <span id="cam-info" class="text-[8px] font-mono text-slate-600 uppercase tracking-tighter">No Camera Detected</span>
+            <!-- Right Column: Results & Logs -->
+            <div class="space-y-6">
+                <!-- Member Info Card -->
+                <div id="result-box" class="hidden relative glass-panel rounded-[2.5rem] p-8 animate-in slide-in-from-bottom-4 duration-500">
+                    <!-- 일치율(Percentage) 뱃지 -->
+                    <div class="absolute top-5 right-5 bg-black/50 border border-[#c5a059]/50 text-[#c5a059] px-3 py-1 rounded-full text-[10px] font-bold tracking-widest flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 bg-[#c5a059] rounded-full animate-ping"></div>
+                        <span id="match-percent">0</span>% MATCH
+                    </div>
+                    
+                    <div class="flex items-center gap-6 mt-2">
+                        <div class="relative">
+                            <img id="user-img" src="" class="w-20 h-20 rounded-full object-cover border-2 border-[#c5a059]/40 p-1 bg-black/40">
+                            <div class="absolute inset-0 rounded-full border border-[#c5a059]/20 animate-pulse"></div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="serif text-[10px] text-[#c5a059] tracking-widest uppercase">Verified Member</div>
+                            <div id="user-name" class="text-2xl font-light tracking-tight text-white">---</div>
+                            <div id="user-dept" class="text-slate-500 text-xs font-light">---</div>
+                        </div>
+                    </div>
                 </div>
-                <div id="console" class="log-box h-24 overflow-y-auto text-[9px] font-mono text-slate-500 space-y-1.5">
-                    <div>> System Standby. Waiting for Auth...</div>
+
+                <!-- Log Console -->
+                <div class="bg-black/40 rounded-[2rem] p-6 border border-white/5">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="serif text-[9px] text-[#c5a059] tracking-[0.2em] uppercase opacity-70">Security Logs</span>
+                        <span id="cam-info" class="text-[8px] font-mono text-slate-600 uppercase tracking-tighter">No Camera Detected</span>
+                    </div>
+                    <div id="console" class="log-box h-32 overflow-y-auto text-[9px] font-mono text-slate-500 space-y-1.5">
+                        <div>> System Standby. Waiting for Auth...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -235,22 +249,28 @@
             if (currentStream) currentStream.getTracks().forEach(t => t.stop());
             
             const device = videoDevices[index];
-            document.getElementById('cam-info').textContent = device.label || `Camera ${index}`;
+            document.getElementById('cam-info').textContent = device ? (device.label || `Camera ${index}`) : 'Auto';
             
             try {
+                // 안드로이드 호환성 향상을 위해 exact 제약 조건 완화
+                const videoConstraints = device && device.deviceId ? { deviceId: device.deviceId } : { facingMode: 'environment' };
+                
                 currentStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { deviceId: device.deviceId ? { exact: device.deviceId } : undefined } 
+                    video: videoConstraints 
                 });
                 
                 const video = document.getElementById('webcam');
                 video.srcObject = currentStream;
+                
+                // 안드로이드에서 자동 재생을 강제하기 위한 플레이 호출
+                video.play().catch(e => printLog("Auto-play prevented", "error"));
                 
                 video.onloadedmetadata = () => {
                     const canvas = document.getElementById('overlay');
                     const displaySize = { width: video.videoWidth, height: video.videoHeight };
                     faceapi.matchDimensions(canvas, displaySize);
                     
-                    printLog(`Active: ${device.label || 'CAM ' + index}`, "success");
+                    printLog(`Active: ${device ? device.label : 'Default'}`, "success");
 
                     setInterval(async () => {
                         if (video.paused || video.ended) return;
@@ -268,13 +288,28 @@
                                 document.getElementById('result-box').classList.remove('hidden');
                                 document.getElementById('user-name').textContent = name;
                                 document.getElementById('user-dept').textContent = dept;
+                                
+                                // 일치율(퍼센테이지) 계산 로직 추가
+                                const confidence = Math.max(0, Math.round((1 - match.distance) * 100));
+                                document.getElementById('match-percent').textContent = confidence;
+                                
                                 const fId = url.match(/[-\w]{25,}/);
                                 document.getElementById('user-img').src = fId ? `https://lh3.googleusercontent.com/u/0/d/${fId[0]}` : url;
                             }
 
-                            ctx.strokeStyle = isUnknown ? '#ff4444' : '#c5a059';
+                            // 텍스트와 박스를 함께 렌더링
+                            const boxColor = isUnknown ? '#ff4444' : '#c5a059';
+                            ctx.strokeStyle = boxColor;
                             ctx.lineWidth = 4;
                             ctx.strokeRect(d.detection.box.x, d.detection.box.y, d.detection.box.width, d.detection.box.height);
+                            
+                            // 화면 내 얼굴 위젯에 퍼센트 텍스트 그리기
+                            if (!isUnknown) {
+                                const confidence = Math.max(0, Math.round((1 - match.distance) * 100));
+                                ctx.fillStyle = boxColor;
+                                ctx.font = 'bold 18px "Noto Sans KR", sans-serif';
+                                ctx.fillText(`${confidence}% 일치`, d.detection.box.x, d.detection.box.y - 10);
+                            }
                         });
                     }, 500);
                 };
