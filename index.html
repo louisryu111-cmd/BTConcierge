@@ -3,306 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Banyan Tree Busan | Secure Access</title>
+    <title>Banyan Tree Busan | Professional Security</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Noto+Sans+KR:wght@300;400;700&display=swap');
-
-        :root {
-            --banyan-gold: #c5a059;
-            --banyan-dark: #0a0c10;
-            --banyan-sand: #f4f1ea;
-        }
-
-        body { 
-            font-family: 'Noto Sans KR', sans-serif; 
-            background-color: var(--banyan-dark); 
-            color: #ffffff;
-            overflow-x: hidden;
-        }
-
+        :root { --banyan-gold: #c5a059; --banyan-dark: #0a0c10; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--banyan-dark); color: #ffffff; overflow-x: hidden; }
         .serif { font-family: 'Bodoni Moda', serif; }
-
-        .bg-luxury {
-            background: radial-gradient(circle at top right, #1a1e26 0%, #0a0c10 100%);
-        }
-
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(197, 160, 89, 0.2);
-        }
-
-        .video-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 4/5;
-            border-radius: 3rem;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        #webcam, #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .gold-glow {
-            box-shadow: 0 0 20px rgba(197, 160, 89, 0.3);
-            animation: pulse-gold 3s infinite;
-        }
-
-        @keyframes pulse-gold {
-            0% { box-shadow: 0 0 10px rgba(197, 160, 89, 0.2); }
-            50% { box-shadow: 0 0 25px rgba(197, 160, 89, 0.5); }
-            100% { box-shadow: 0 0 10px rgba(197, 160, 89, 0.2); }
-        }
-
-        .btn-premium {
-            background: linear-gradient(135deg, #c5a059 0%, #a38141 100%);
-            color: #000;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .btn-premium:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
-            filter: brightness(1.1);
-        }
-
-        .btn-premium:active { transform: translateY(0); }
-
-        .log-box::-webkit-scrollbar { width: 3px; }
-        .log-box::-webkit-scrollbar-thumb { background: var(--banyan-gold); border-radius: 10px; }
-        
-        .camera-switch-btn {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            z-index: 20;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(197, 160, 89, 0.4);
-            padding: 0.75rem;
-            border-radius: 100%;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        .camera-switch-btn:active { transform: rotate(180deg); }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(197, 160, 89, 0.25); }
+        .video-container { position: relative; width: 100%; aspect-ratio: 4/5; border-radius: 3.5rem; overflow: hidden; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7); border: 1px solid rgba(197, 160, 89, 0.2); }
+        #webcam, #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        .btn-premium { background: linear-gradient(135deg, #c5a059 0%, #a38141 100%); color: #000; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-premium:disabled { opacity: 0.2; transform: scale(0.98); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .log-box::-webkit-scrollbar { width: 2px; }
+        .log-box::-webkit-scrollbar-thumb { background: var(--banyan-gold); }
     </style>
 </head>
-<body class="bg-luxury min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Top Navigation -->
+    <!-- Header -->
     <header class="p-8 flex justify-between items-center">
         <div class="space-y-1">
-            <p class="serif text-xs tracking-[0.3em] text-[#c5a059] uppercase">Banyan Tree</p>
-            <h1 class="text-xl font-light tracking-tight">Busan Haeundae</h1>
+            <p class="serif text-[10px] tracking-[0.4em] text-[#c5a059] uppercase">Banyan Tree</p>
+            <h1 class="text-xl font-light tracking-widest uppercase">Busan</h1>
         </div>
-        <div class="w-10 h-10 border border-[#c5a059]/30 rounded-full flex items-center justify-center">
-            <div class="w-1.5 h-1.5 bg-[#c5a059] rounded-full animate-ping"></div>
+        <div id="connection-status" class="flex items-center text-[10px] text-slate-500 uppercase tracking-tighter">
+            <span class="status-dot bg-red-500 animate-pulse"></span> Offline
         </div>
     </header>
 
-    <main class="flex-1 px-6 max-w-lg mx-auto w-full pb-12 space-y-8">
+    <main class="flex-1 px-6 max-w-lg mx-auto w-full pb-10 space-y-6">
         
-        <!-- Login Panel -->
-        <div id="login-panel" class="glass-panel rounded-[3rem] p-10 text-center space-y-8 mt-10">
-            <div class="serif text-4xl text-[#c5a059]">Access</div>
-            <!-- 문구 크기 축소 반영 (text-xs) -->
-            <p class="text-[11px] text-slate-400 font-light leading-relaxed px-4 tracking-tight">
-                반얀트리 부산의 프라이빗 서비스를 위해<br>보안 인증이 필요합니다.
+        <!-- Login Section -->
+        <div id="login-panel" class="glass-panel rounded-[3.5rem] p-12 text-center space-y-10 mt-6">
+            <div class="space-y-2">
+                <div class="serif text-5xl text-[#c5a059] font-light italic">Access</div>
+                <div class="h-px w-12 bg-[#c5a059]/30 mx-auto"></div>
+            </div>
+            <p class="text-[11px] text-slate-400 font-light leading-relaxed tracking-tight">
+                반얀트리 부산의 프라이빗 서비스를 위해<br>멤버십 인증이 필요합니다.
             </p>
-            <button id="btn-login" class="w-full btn-premium py-5 rounded-full font-bold text-sm tracking-widest uppercase flex items-center justify-center gap-3">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.9 3.16-1.76 4.02-1.12 1.12-2.8 2.32-5.6 2.32-4.8 0-8.6-3.88-8.6-8.68s3.8-8.68 8.6-8.68c2.6 0 4.5 1.04 5.9 2.36l2.3-2.3c-2-1.9-4.6-3.06-8.2-3.06-6.4 0-11.6 5.2-11.6 11.6s5.2 11.6 11.6 11.6c3.48 0 6.12-1.14 8.12-3.22 2.08-2.08 2.74-5.02 2.74-7.38 0-.46-.04-.9-.12-1.32h-10.74z"/></svg>
-                Google 계정으로 인증
+            <button id="btn-login" class="w-full btn-premium py-5 rounded-full font-bold text-xs tracking-[0.2em] uppercase shadow-2xl">
+                Google 계정 인증 시작
             </button>
         </div>
 
-        <!-- Main App Panel -->
-        <div id="app-panel" class="hidden space-y-8 animate-in fade-in duration-1000">
-            
-            <!-- Video Container -->
-            <div class="video-container gold-glow">
-                <!-- 카메라 전환 버튼 -->
-                <button id="btn-switch-camera" class="camera-switch-btn text-[#c5a059]">
+        <!-- Main Workspace -->
+        <div id="app-panel" class="hidden space-y-6 animate-in fade-in duration-1000">
+            <div class="video-container">
+                <video id="webcam" autoplay playsinline muted></video>
+                <canvas id="overlay"></canvas>
+                
+                <!-- Loading State -->
+                <div id="loading-overlay" class="absolute inset-0 bg-[#0a0c10] flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 border-t-2 border-[#c5a059] rounded-full animate-spin mb-6"></div>
+                    <p class="serif text-sm text-[#c5a059] tracking-[0.3em] uppercase">Syncing Security</p>
+                    <p id="sync-detail" class="text-[9px] text-slate-600 mt-4 uppercase tracking-widest font-mono italic">Initializing Face-AI...</p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="grid grid-cols-4 gap-3">
+                <button id="btn-start" disabled class="col-span-3 btn-premium py-5 rounded-full font-bold text-[11px] tracking-[0.2em] uppercase">시스템 가동</button>
+                <button id="btn-next-camera" title="카메라 전환" class="col-span-1 bg-white/5 border border-[#c5a059]/30 rounded-full flex items-center justify-center text-[#c5a059] active:scale-90 transition-transform">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                 </button>
-
-                <video id="webcam" autoplay playsinline muted></video>
-                <canvas id="overlay"></canvas>
-                
-                <div id="loading-overlay" class="absolute inset-0 bg-[#0a0c10] flex flex-col items-center justify-center p-12 text-center">
-                    <div class="w-12 h-12 border-b-2 border-[#c5a059] rounded-full animate-spin mb-6"></div>
-                    <p class="serif text-lg text-[#c5a059] tracking-widest">Synchronizing</p>
-                    <p id="sync-status" class="text-[10px] text-slate-500 mt-3 uppercase tracking-tighter">Security Protocols Loading...</p>
-                </div>
             </div>
 
-            <button id="btn-start" disabled class="w-full btn-premium py-5 rounded-full font-bold text-sm tracking-widest uppercase disabled:opacity-30 disabled:translate-y-0 shadow-xl">
-                카메라 시작
-            </button>
-
-            <!-- Luxury Result Card -->
-            <div id="result-box" class="hidden glass-panel rounded-[2.5rem] p-8 animate-in slide-in-from-bottom-8 duration-700">
+            <!-- Member Info Card -->
+            <div id="result-box" class="hidden glass-panel rounded-[3rem] p-8 animate-in slide-in-from-bottom-4 duration-500">
                 <div class="flex items-center gap-6">
                     <div class="relative">
-                        <img id="user-img" src="" class="w-24 h-24 rounded-full object-cover border-2 border-[#c5a059]/50 p-1 bg-[#0a0c10]">
-                        <div class="absolute -bottom-1 -right-1 bg-[#c5a059] p-1.5 rounded-full">
-                            <svg class="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
+                        <img id="user-img" src="" class="w-24 h-24 rounded-full object-cover border-2 border-[#c5a059]/40 p-1.5 bg-black/40">
+                        <div class="absolute inset-0 rounded-full border border-[#c5a059]/20 animate-pulse"></div>
                     </div>
                     <div class="space-y-1">
-                        <div class="serif text-xs text-[#c5a059] tracking-widest uppercase">Verified Member</div>
-                        <div id="user-name" class="text-3xl font-light">---</div>
-                        <div id="user-dept" class="text-slate-400 text-sm font-light">---</div>
-                        <div id="user-id" class="text-[10px] text-[#c5a059]/60 font-mono pt-2 tracking-widest uppercase">Member No. ---</div>
+                        <div class="serif text-[10px] text-[#c5a059] tracking-widest uppercase">Verified Member</div>
+                        <div id="user-name" class="text-3xl font-light tracking-tight text-white">---</div>
+                        <div id="user-dept" class="text-slate-500 text-xs font-light">---</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Minimalist Console -->
-            <div class="bg-black/20 rounded-3xl p-6 border border-white/5">
+            <!-- Log Console -->
+            <div class="bg-black/40 rounded-[2rem] p-6 border border-white/5">
                 <div class="flex justify-between items-center mb-4">
-                    <span class="serif text-[10px] text-[#c5a059] tracking-[0.2em] uppercase">Security Logs</span>
-                    <span id="log-count" class="text-[9px] font-mono text-slate-600 bg-white/5 px-2 py-0.5 rounded-full">00</span>
+                    <span class="serif text-[9px] text-[#c5a059] tracking-[0.2em] uppercase opacity-70">Security Logs</span>
+                    <span id="cam-info" class="text-[8px] font-mono text-slate-600 uppercase tracking-tighter">No Camera Detected</span>
                 </div>
-                <div id="console" class="log-box h-28 overflow-y-auto text-[10px] font-mono text-slate-500 space-y-1.5">
-                    <div>> Terminal Initialized.</div>
+                <div id="console" class="log-box h-24 overflow-y-auto text-[9px] font-mono text-slate-500 space-y-1.5">
+                    <div>> System Standby. Waiting for Auth...</div>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer class="p-8 text-center">
-        <p class="serif text-[9px] text-slate-600 tracking-[0.4em] uppercase">Private & Confidential</p>
+    <footer class="p-8 text-center border-t border-white/5">
+        <p class="serif text-[9px] text-slate-600 tracking-[0.5em] uppercase">Private Residence & Spa</p>
     </footer>
 
     <script>
-        const CLIENT_ID = '88725170403-lkp5homgvhjv50ffoadde8u43sfr8dba.apps.googleusercontent.com'; 
-        const SPREADSHEET_ID = '1X1O3wvZ2j_sUeJSifv0Uiex55kAzFEhtZ5vgTlgmIwY'; 
-        const SHEET_NAME = 'sheet1'; 
+        const CLIENT_ID = '88725170403-lkp5homgvhjv50ffoadde8u43sfr8dba.apps.googleusercontent.com';
+        const SPREADSHEET_ID = '1X1O3wvZ2j_sUeJSifv0Uiex55kAzFEhtZ5vgTlgmIwY';
+        const SHEET_NAME = 'sheet1';
 
         let accessToken = null;
         let tokenClient;
         let faceMatcher = null;
-        let logCount = 0;
-        let currentFacingMode = 'user'; // 초기값 전면 카메라
+        let videoDevices = [];
+        let currentDeviceIndex = 0;
         let currentStream = null;
 
         const consoleEl = document.getElementById('console');
         function printLog(msg, type = 'info') {
             const div = document.createElement('div');
             div.textContent = `> ${msg.toUpperCase()}`;
-            if (type === 'error') div.className = 'text-red-800';
-            if (type === 'success') div.className = 'text-[#c5a059]';
+            if (type === 'error') div.className = 'text-red-900';
+            if (type === 'success') div.className = 'text-[#c5a059] font-bold';
             consoleEl.appendChild(div);
             consoleEl.scrollTop = consoleEl.scrollHeight;
-            document.getElementById('log-count').textContent = (++logCount).toString().padStart(2, '0');
         }
+
+        // --- 새롭게 추가된 카메라 자동 스캔 및 감지 시스템 ---
+        async function updateDeviceList() {
+            try {
+                // 빈 스트림을 먼저 열어 브라우저가 USB 웹캠의 권한과 이름을 정확히 읽어오도록 유도합니다.
+                const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                videoDevices = devices.filter(d => d.kind === 'videoinput');
+                
+                printLog(`SYSTEM: ${videoDevices.length}개의 카메라 장치 인식됨`, "success");
+                videoDevices.forEach((d, i) => {
+                    // 로그창에 현재 인식된 카메라 이름들을 전부 출력합니다.
+                    printLog(`[CH ${i}] ${d.label || '알 수 없는 USB 장치'}`);
+                });
+                
+                tempStream.getTracks().forEach(track => track.stop());
+            } catch (err) {
+                printLog("카메라 접근 권한이 필요합니다.", "error");
+            }
+        }
+
+        // OTG 젠더로 웹캠을 꽂거나 뺄 때 즉시 감지하여 목록을 갱신합니다.
+        navigator.mediaDevices.addEventListener('devicechange', async () => {
+            printLog("하드웨어 연결 상태 변경 감지됨. 재스캔 중...");
+            await updateDeviceList();
+        });
+        // --------------------------------------------------------
 
         window.onload = () => {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/drive.readonly',
                 callback: async (res) => {
-                    if (res.error) return printLog("Auth Error: " + res.error, 'error');
+                    if (res.error) return printLog("Auth Error: " + res.error, "error");
                     accessToken = res.access_token;
-                    document.getElementById('login-panel').classList.add('hidden');
+                    document.getElementById('login-panel').style.display = 'none';
                     document.getElementById('app-panel').classList.remove('hidden');
-                    printLog("Authenticated Successfully", 'success');
-                    await startSync();
+                    document.getElementById('connection-status').innerHTML = '<span class="status-dot bg-green-500"></span> Online';
+                    printLog("Authentication Successful", "success");
+                    await initSecuritySystem();
                 }
             });
         };
 
         document.getElementById('btn-login').onclick = () => tokenClient.requestAccessToken();
 
-        async function startSync() {
+        async function initSecuritySystem() {
             try {
-                document.getElementById('sync-status').textContent = "Loading Bio-Engine...";
+                const syncMsg = document.getElementById('sync-detail');
+                syncMsg.textContent = "Loading Bio-Metric AI Engine...";
+                
                 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
                 await Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
                     faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
                     faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
                 ]);
-                printLog("AI Models Engaged");
+                printLog("AI Models Ready");
 
-                document.getElementById('sync-status').textContent = "Accessing Member Database...";
-                const encodedRange = encodeURIComponent(`${SHEET_NAME}!A1:E500`);
-                const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodedRange}`;
+                syncMsg.textContent = `Reading Member Data [${SHEET_NAME}]...`;
+                const range = encodeURIComponent(`${SHEET_NAME}!A1:E500`);
+                const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}`, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
                 
-                const sheetRes = await fetch(sheetUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
-                const data = await sheetRes.json();
+                if (!res.ok) throw new Error(`HTTP ${res.status}: Check Sheet Name and Permissions`);
+                const data = await res.json();
+                
                 const users = data.values.slice(1).map(row => ({
                     id: row[0], name: row[1], dept: row[2], url: row[3]
                 })).filter(u => u.url && u.name);
 
-                printLog(`${users.length} Records Retrieved`);
-                await buildFaceMatcher(users);
+                printLog(`${users.length} Members Found. Analyzing Bio-data...`);
+
+                const descriptors = await Promise.all(users.map(async user => {
+                    try {
+                        let img;
+                        if (user.url.includes("drive.google.com")) {
+                            const fId = user.url.match(/[-\w]{25,}/)[0];
+                            const dRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fId}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
+                            img = await faceapi.bufferToImage(await dRes.blob());
+                        } else {
+                            img = await faceapi.fetchImage(`https://wsrv.nl/?url=${encodeURIComponent(user.url)}&output=jpg`);
+                        }
+                        const d = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                        return d ? new faceapi.LabeledFaceDescriptors(`${user.name}|${user.dept}|${user.url}`, [d.descriptor]) : null;
+                    } catch (e) { return null; }
+                }));
+
+                faceMatcher = new faceapi.FaceMatcher(descriptors.filter(d => d !== null), 0.55);
+                
+                // 기존의 단순 기기 탐색 코드를 지우고, 강력한 스캔 함수로 대체합니다.
+                await updateDeviceList();
+
+                document.getElementById('loading-overlay').style.display = 'none';
+                document.getElementById('btn-start').disabled = false;
+                printLog("Security System Armed", "success");
             } catch (err) {
-                printLog(err.message, 'error');
+                printLog(err.message, "error");
+                document.getElementById('sync-detail').textContent = "ERROR: " + err.message;
             }
         }
 
-        async function buildFaceMatcher(users) {
-            const descriptors = await Promise.all(users.map(async user => {
-                try {
-                    let imageSource;
-                    if (user.url.includes("drive.google.com")) {
-                        const fileIdMatch = user.url.match(/[-\w]{25,}/);
-                        const driveUrl = `https://www.googleapis.com/drive/v3/files/${fileIdMatch[0]}?alt=media`;
-                        const imgRes = await fetch(driveUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
-                        const blob = await imgRes.blob();
-                        imageSource = await faceapi.bufferToImage(blob);
-                    } else {
-                        imageSource = await faceapi.fetchImage(`https://wsrv.nl/?url=${encodeURIComponent(user.url)}&output=jpg`);
-                    }
-                    const detection = await faceapi.detectSingleFace(imageSource, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
-                    if (detection) {
-                        printLog(`Analysed: ${user.name}`, 'success');
-                        return new faceapi.LabeledFaceDescriptors(`${user.name}|${user.dept}|${user.id}|${user.url}`, [detection.descriptor]);
-                    }
-                } catch (e) { printLog(`Skip: ${user.name}`, 'info'); }
-                return null;
-            }));
-
-            faceMatcher = new faceapi.FaceMatcher(descriptors.filter(d => d !== null), 0.5);
-            document.getElementById('loading-overlay').style.display = 'none';
-            document.getElementById('btn-start').disabled = false;
-            printLog("System Armed & Ready", 'success');
-        }
-
-        async function startRecognition() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-            }
-
-            const video = document.getElementById('webcam');
-            const canvas = document.getElementById('overlay');
+        async function startScanning(index) {
+            if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+            
+            const device = videoDevices[index];
+            document.getElementById('cam-info').textContent = device.label || `Camera ${index}`;
             
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: currentFacingMode } 
+                currentStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { deviceId: device.deviceId ? { exact: device.deviceId } : undefined } 
                 });
-                currentStream = stream;
-                video.srcObject = stream;
-
+                
+                const video = document.getElementById('webcam');
+                video.srcObject = currentStream;
+                
                 video.onloadedmetadata = () => {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+                    const canvas = document.getElementById('overlay');
                     const displaySize = { width: video.videoWidth, height: video.videoHeight };
                     faceapi.matchDimensions(canvas, displaySize);
+                    
+                    printLog(`Active: ${device.label || 'CAM ' + index}`, "success");
 
-                    const interval = setInterval(async () => {
+                    setInterval(async () => {
                         if (video.paused || video.ended) return;
                         const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
                         const resized = faceapi.resizeResults(detections, displaySize);
@@ -312,35 +262,37 @@
                         resized.forEach(d => {
                             const match = faceMatcher.findBestMatch(d.descriptor);
                             const isUnknown = match.label.includes('unknown');
-                            ctx.strokeStyle = isUnknown ? '#ef4444' : '#c5a059';
-                            ctx.lineWidth = 3;
-                            ctx.strokeRect(d.detection.box.x, d.detection.box.y, d.detection.box.width, d.detection.box.height);
                             
                             if (!isUnknown) {
-                                const [name, dept, id, url] = match.label.split('|');
+                                const [name, dept, url] = match.label.split('|');
                                 document.getElementById('result-box').classList.remove('hidden');
                                 document.getElementById('user-name').textContent = name;
                                 document.getElementById('user-dept').textContent = dept;
-                                document.getElementById('user-id').textContent = `Member No. ${id}`;
-                                const fIdMatch = url.match(/[-\w]{25,}/);
-                                document.getElementById('user-img').src = fIdMatch ? `https://lh3.googleusercontent.com/u/0/d/${fIdMatch[0]}` : url;
+                                const fId = url.match(/[-\w]{25,}/);
+                                document.getElementById('user-img').src = fId ? `https://lh3.googleusercontent.com/u/0/d/${fId[0]}` : url;
                             }
+
+                            ctx.strokeStyle = isUnknown ? '#ff4444' : '#c5a059';
+                            ctx.lineWidth = 4;
+                            ctx.strokeRect(d.detection.box.x, d.detection.box.y, d.detection.box.width, d.detection.box.height);
                         });
-                    }, 600);
+                    }, 500);
                 };
-            } catch (err) {
-                printLog("Camera Access Denied", 'error');
-            }
+            } catch (e) { printLog("Camera Fail: " + e.message, "error"); }
         }
 
-        // 카메라 전환 이벤트
-        document.getElementById('btn-switch-camera').onclick = () => {
-            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
-            printLog(`Switching to ${currentFacingMode} camera`, 'info');
-            startRecognition();
+        document.getElementById('btn-start').onclick = () => startScanning(currentDeviceIndex);
+        
+        document.getElementById('btn-next-camera').onclick = () => {
+            if (videoDevices.length === 0) {
+                printLog("카메라를 찾을 수 없습니다.", "error");
+                return;
+            }
+            // 다음 카메라 인덱스로 넘어가며 스캔 시작
+            currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+            printLog(`카메라 채널 변경: CH ${currentDeviceIndex} 연결 시도...`);
+            startScanning(currentDeviceIndex);
         };
-
-        document.getElementById('btn-start').onclick = startRecognition;
     </script>
 </body>
 </html>
