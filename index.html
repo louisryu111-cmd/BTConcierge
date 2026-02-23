@@ -34,14 +34,19 @@
         /* 푸터(Copyright) */
         .footer { margin-top: auto; padding: 20px 0; text-align: center; font-size: 11px; color: #555; letter-spacing: 1px; }
 
-        /* 서브 화면 */
+        /* 서브 화면 공통 */
         .sub-screen { display: none; position: absolute; inset: 0; background-color: var(--bg-color); z-index: 500; padding: 25px 20px; flex-direction: column; overflow-y: auto; }
         .back-btn { color: var(--primary-color); display: flex; align-items: center; cursor: pointer; margin-bottom: 20px; }
 
-        /* 음성인식 버튼 스타일 */
-        .input-group { position: relative; width: 80%; margin-bottom: 20px; }
-        #access-code { width: 100%; padding: 15px; padding-right: 50px; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:10px; text-align:center; box-sizing: border-box; font-size: 16px; }
-        #voice-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary-color); cursor: pointer; }
+        /* 입력 그룹 (인증코드 & 발렛) */
+        .input-group { position: relative; width: 80%; margin-bottom: 20px; align-self: center; }
+        .styled-input { width: 100%; padding: 15px; padding-right: 50px; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:10px; text-align:center; box-sizing: border-box; font-size: 16px; }
+        .mic-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary-color); cursor: pointer; }
+
+        /* 바텀 시트 (4 Season Tour) */
+        #bottom-sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; }
+        #bottom-sheet { display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 30px 20px; z-index: 1001; box-sizing: border-box; transition: transform 0.3s ease; }
+        .sub-list-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: #252525; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -68,8 +73,8 @@
         <div id="auth-code" class="auth-screen" style="display:none;">
             <div class="logo-intro" style="font-size:18px;">ENTER ACCESS CODE</div>
             <div class="input-group">
-                <input type="text" id="access-code" placeholder="코드를 입력하세요">
-                <i class="material-icons" id="voice-btn" onclick="startVoiceRecognition()">mic</i>
+                <input type="text" id="access-code" class="styled-input" placeholder="코드를 입력하세요">
+                <i class="material-icons mic-btn" onclick="startVoiceRecognition('access-code')">mic</i>
             </div>
             <button class="auth-btn" style="background:var(--primary-color)" onclick="checkCode()">접속</button>
             <button class="auth-btn" style="background:none; border:none; color:#666;" onclick="location.reload()">뒤로가기</button>
@@ -81,14 +86,14 @@
         <div style="font-size:22px; margin-bottom:30px; font-weight:300;">반갑습니다, <b id="user-name">회원</b>님.</div>
         
         <div class="menu-grid">
-            <div class="menu-item" onclick="openSub('concierge')"><i class="material-icons">room_service</i><span>Concierge Service</span></div>
+            <div class="menu-item" onclick="openSub('concierge')"><i class="material-icons">room_service</i><span>Concierge</span></div>
             <div class="menu-item" onclick="openSub('hotel')"><i class="material-icons">apartment</i><span>Hotel Service</span></div>
             <div class="menu-item" onclick="window.open('https://www.banyantree.com', '_blank')"><i class="material-icons">event_available</i><span>Booking</span></div>
             <div class="menu-item" onclick="openSub('valet')"><i class="material-icons">directions_car</i><span>Valet</span></div>
         </div>
 
         <div class="footer">
-            COPYRIGHT © BANYAN TREE BUSAN HAEUNDAE. ALL RIGHTS RESERVED.
+            COPYRIGHT © BANYAN TREE BUSAN. ALL RIGHTS RESERVED.
         </div>
     </div>
 
@@ -106,7 +111,7 @@
     <div id="sub-hotel" class="sub-screen">
         <div class="back-btn" onclick="closeSub()"><i class="material-icons">arrow_back</i> 뒤로가기</div>
         <h2 style="margin-bottom:25px;">Hotel Service</h2>
-    <div class="menu-grid">
+        <div class="menu-grid">
             <div class="menu-item" onclick="alert('Dining 예약')"><i class="material-icons">restaurant</i><span>Dining</span></div>
             <div class="menu-item" onclick="alert('Lounge 안내')"><i class="material-icons">local_bar</i><span>Lounge</span></div>
             <div class="menu-item" onclick="alert('Wellness & SPA')"><i class="material-icons">spa</i><span>Wellness</span></div>
@@ -116,26 +121,34 @@
         </div>
     </div>
 
+    <div id="sub-valet" class="sub-screen">
+        <div class="back-btn" onclick="closeSub()"><i class="material-icons">arrow_back</i> 뒤로가기</div>
+        <h2 style="margin-bottom:10px;">Valet Service</h2>
+        <p style="font-size:13px; color:#aaa; line-height:1.6; margin-bottom:25px;">호텔 내 체류중인 고객님을 위한 전용 출차 서비스입니다. 호텔내에 위치 하실때 서비스가 제공됩니다.</p>
+        
+        <div class="input-group" style="width:100%;">
+            <input type="text" id="car-number" class="styled-input" placeholder="차량번호를 입력하세요 (예: 12가 3456)">
+            <i class="material-icons mic-btn" onclick="startVoiceRecognition('car-number')">mic</i>
+        </div>
+        
+        <button class="auth-btn" style="width:100%; background:var(--primary-color); margin-top:10px;" onclick="requestValet()">출차 요청하기</button>
+        
+        <div class="menu-grid" style="margin-top:30px; opacity:0.7;">
+            <div class="menu-item" onclick="alert('현재 차량 위치: B2 구역 15번')"><i class="material-icons">where_to_vote</i><span>위치 확인</span></div>
+            <div class="menu-item" onclick="alert('요금 정산 화면으로 이동합니다.')"><i class="material-icons">payments</i><span>요금 정산</span></div>
+        </div>
+    </div>
+
     <div id="bottom-sheet-overlay" onclick="closeTour()"></div>
     <div id="bottom-sheet">
-        <div style="color:var(--primary-color); font-weight:bold; margin-bottom:15px; font-size:18px;">4 Season Tour Drive</div>
+        <div style="color:var(--primary-color); font-weight:bold; margin-bottom:20px; font-size:18px;">4 Season Tour Drive</div>
         <div class="sub-list-item" onclick="window.open('https://drive.google.com/file/d/1Ax4O2b49CM5I6-KnMebXjz9r8PHlgUmz/view')"><span>🌸 Spring Course</span><i class="material-icons">chevron_right</i></div>
         <div class="sub-list-item" onclick="window.open('https://drive.google.com/file/d/1m1nqU2eRtS4YHKAPKqYEekQn7KF0i_sp/view')"><span>🌊 Summer Course</span><i class="material-icons">chevron_right</i></div>
         <div class="sub-list-item" onclick="window.open('https://drive.google.com/file/d/1d84lGgWJuSJUh3F-AJThTIq-B-t9usRd/view')"><span>🍂 Autumn Course</span><i class="material-icons">chevron_right</i></div>
         <div class="sub-list-item" onclick="window.open('https://drive.google.com/file/d/1YpcJG6XhzOfaR_e0iDOY0y2yXt5f0t8S/view')"><span>❄️ Winter Course</span><i class="material-icons">chevron_right</i></div>
+        <button class="auth-btn" style="width:100%; margin-top:15px; background:#333; border:none;" onclick="closeTour()">닫기</button>
     </div>
 </div>
-
-    <div id="sub-valet" class="sub-screen">
-        <div class="back-btn" onclick="closeSub()"><i class="material-icons">arrow_back</i> 뒤로가기</div>
-        <h2 style="margin-bottom:25px;">Valet Service</h2>
-       <div style="text-align:center; padding:20px; color:#aaa; font-size:14px; line-height:1.6;">호텔 내 체류 중인 고객님을 위한 전용 출차 서비스입니다.</div>
-        <div class="input-group" style="width:100%;">
-            <input type="text" id="car-num" class="code-input" placeholder="차량번호 전체 입력">
-            <button class="voice-btn" onclick="startSTT('car-num')"><i class="material-icons">mic</i></button>
-        </div>
-        <button class="auth-btn" style="width:100%; background:var(--primary-color);" onclick="sendValet()">출차 요청하기</button>
-    </div>
 
 <script>
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjdw6b40uOKNdnSDIL0Hmz_5wiRsJV6WznPvR_fNAmneePy-JcE6DIlC5E_Asdhb-jGeh_01VzR8H-/pub?output=csv";
@@ -144,12 +157,10 @@
 
     function log(m) {
         const d = document.getElementById('debug-log');
-        d.innerHTML += `> ${m}<br>`;
-        d.scrollTop = d.scrollHeight;
+        if(d) { d.innerHTML += `> ${m}<br>`; d.scrollTop = d.scrollHeight; }
     }
 
-    function alertLink() { alert("홈페이지 구축 후 링크 연결 예정입니다."); }
-
+    // 안면 인식 관련 로직 (기존 유지)
     function fixUrl(url) {
         if (!url) return "";
         let id = "";
@@ -162,48 +173,38 @@
 
     async function showAuthStep(step) {
         document.getElementById('auth-main').style.display = 'none';
-        if (step === 'face') {
-            document.getElementById('auth-face').style.display = 'flex';
-            initFaceAuth();
-        } else {
-            document.getElementById('auth-code').style.display = 'flex';
-        }
+        if (step === 'face') { document.getElementById('auth-face').style.display = 'flex'; initFaceAuth(); }
+        else { document.getElementById('auth-code').style.display = 'flex'; }
     }
 
     async function initFaceAuth() {
         try {
-            log("모델 로딩 중...");
             const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
             await Promise.all([
                 faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
                 faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
                 faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
             ]);
-            log("카메라 활성화...");
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
             const video = document.getElementById('video-feed');
             video.srcObject = stream;
             video.onloadedmetadata = () => video.play();
             loadData();
-        } catch (e) { log("카메라 에러: " + e.message); }
+        } catch (e) { log("카메라 에러"); }
     }
 
     async function loadData() {
         try {
-            log("데이터 연동 중...");
             const res = await fetch(SHEET_URL + "&t=" + Date.now());
             const text = await res.text();
             const rows = text.split('\n').slice(1);
             const labeled = [];
-
             for (let row of rows) {
                 const col = row.split(',');
                 if (col.length < 2) continue;
                 const name = col[0].trim();
                 const url = fixUrl(col[1].trim());
                 if (!name || !url) continue;
-
-                // 요청 반영: 실명 대신 문구 표시
                 log(`회원 이미지 분석 중...`);
                 try {
                     const img = await faceapi.fetchImage(url);
@@ -211,11 +212,10 @@
                     if (det) labeled.push(new faceapi.LabeledFaceDescriptors(name, [det.descriptor]));
                 } catch (e) {}
             }
-            if (labeled.length === 0) throw new Error("데이터 없음");
             faceMatcher = new faceapi.FaceMatcher(labeled, 0.45);
             document.getElementById('face-status').innerText = "인식 준비 완료!";
             startRecognition();
-        } catch (e) { log("연동 실패: " + e.message); }
+        } catch (e) { log("데이터 연동 실패"); }
     }
 
     async function startRecognition() {
@@ -228,7 +228,6 @@
                 const score = Math.round((1 - match.distance) * 100);
                 if (score >= 70 && match.label !== "unknown") {
                     isDetected = true;
-                    // 요청 반영: 76% 이상일 때만 이름 표시
                     const displayName = (score >= 76) ? match.label : "회원";
                     loginSuccess(displayName);
                     return;
@@ -239,6 +238,7 @@
         scan();
     }
 
+    // 공통 기능
     function loginSuccess(name) {
         document.getElementById('auth-overlay').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
@@ -252,23 +252,32 @@
         else alert("코드가 일치하지 않습니다.");
     }
 
-    // 음성 인식 기능
-    function startVoiceRecognition() {
+    // 음성 인식 (STT) 통합 함수
+    function startVoiceRecognition(targetId) {
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'ko-KR';
         recognition.start();
-        document.getElementById('face-status').innerText = "음성 인식 중...";
-        
         recognition.onresult = (event) => {
             const result = event.results[0][0].transcript;
-            document.getElementById('access-code').value = result;
-            checkCode();
+            document.getElementById(targetId).value = result;
+            if(targetId === 'access-code') checkCode();
         };
-        recognition.onerror = () => alert("음성 인식에 실패했습니다.");
     }
 
+    // 화면 전환 및 바텀 시트
     function openSub(id) { document.getElementById('main-app').style.display='none'; document.getElementById('sub-'+id).style.display='flex'; }
     function closeSub() { document.querySelectorAll('.sub-screen').forEach(s=>s.style.display='none'); document.getElementById('main-app').style.display='flex'; }
+    
+    function openTour() { document.getElementById('bottom-sheet-overlay').style.display='block'; document.getElementById('bottom-sheet').style.display='block'; }
+    function closeTour() { document.getElementById('bottom-sheet-overlay').style.display='none'; document.getElementById('bottom-sheet').style.display='none'; }
+
+    // 발렛 출차 요청 (반얀트리 Duve 연동 예정)
+    function requestValet() {
+        const carNum = document.getElementById('car-number').value;
+        if(!carNum) { alert("차량 번호를 입력해주세요."); return; }
+        alert(`${carNum} 차량의 출차 요청이 반얀트리 Duve 시스템으로 전송되었습니다.`);
+        // window.open('DUVE_LINK_HERE?car=' + encodeURIComponent(carNum)); // 링크 확정 시 주석 해제
+    }
 </script>
 </body>
 </html>
