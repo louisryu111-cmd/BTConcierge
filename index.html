@@ -10,20 +10,29 @@
         :root { --primary-color: #8E7958; --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #FFFFFF; }
         body { margin: 0; padding: 0; background-color: #000; font-family: 'Noto Sans KR', sans-serif; color: var(--text-color); overflow: hidden; }
         #app-container { max-width: 480px; margin: 0 auto; background-color: var(--bg-color); height: 100vh; position: relative; display: flex; flex-direction: column; }
+        
+        /* 인증 레이어 */
         #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; background: #000; }
         .auth-screen { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; }
         .logo-intro { font-size: 22px; font-weight: 300; letter-spacing: 2px; margin-bottom: 50px; color: var(--primary-color); text-align: center; }
         .auth-btn { width: 80%; background-color: var(--card-bg); color: #fff; border: 1px solid var(--primary-color); padding: 18px; border-radius: 12px; font-size: 16px; margin-bottom: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .camera-container { position: relative; width: 260px; height: 260px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary-color); margin-bottom: 20px; }
+        
+        /* 안면 인식 UI */
+        .camera-container { position: relative; width: 260px; height: 260px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary-color); margin-bottom: 20px; background: #1a1a1a; }
         #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary-color); box-shadow: 0 0 15px var(--primary-color); animation: scan 2s infinite linear; }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+
+        /* 결과 팝업 */
         #match-popup { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; }
         .member-photo { width: 150px; height: 150px; border-radius: 50%; border: 3px solid var(--primary-color); margin-bottom: 20px; object-fit: cover; }
-        #main-app { display: none; flex: 1; flex-direction: column; padding: 25px 20px; }
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .menu-item { background-color: var(--card-bg); border-radius: 15px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #333; }
+
+        /* 메인 앱 레이아웃 */
+        #main-app { display: none; flex: 1; flex-direction: column; padding: 25px 20px; overflow-y: auto; }
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+        .menu-item { background-color: var(--card-bg); border-radius: 15px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #333; cursor: pointer; }
         .menu-item i { font-size: 35px; color: var(--primary-color); margin-bottom: 10px; }
+        
         .sub-screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 500; padding: 25px 20px; box-sizing: border-box; flex-direction: column; }
     </style>
 </head>
@@ -43,138 +52,226 @@
                 <video id="video-feed" playsinline muted></video>
                 <div class="scan-line"></div>
             </div>
-            <div id="face-status" style="color:var(--primary-color); text-align:center; font-size:13px; padding:0 20px;">연결 중...</div>
-            <button class="auth-btn" style="background:none; border:none; color:#666;" onclick="location.reload()">취소</button>
+            <div id="face-status" style="color:var(--primary-color); text-align:center; font-size:13px; padding:0 20px;">시스템 초기화 중...</div>
+            <button class="auth-btn" style="background:none; border:none; color:#666; margin-top:20px;" onclick="location.reload()">뒤로가기</button>
         </div>
 
         <div id="auth-code" class="auth-screen" style="display:none;">
-            <input type="text" id="access-code" style="width:80%; padding:15px; margin-bottom:20px;" placeholder="코드 입력">
-            <button class="auth-btn" onclick="checkCode()">접속</button>
+            <div class="logo-intro">MEMBER ACCESS</div>
+            <input type="text" id="access-code" style="width:70%; padding:18px; border-radius:12px; border:1px solid #444; background:#1a1a1a; color:#fff; text-align:center; font-size:18px; margin-bottom:20px;" placeholder="코드를 입력하세요">
+            <button class="auth-btn" style="background:var(--primary-color)" onclick="checkCode()">접속하기</button>
+            <button class="auth-btn" style="background:none; border:none; color:#666;" onclick="location.reload()">뒤로가기</button>
         </div>
 
         <div id="match-popup">
             <img id="match-member-photo" src="" class="member-photo">
-            <div id="match-rate" style="font-size:24px; color:white;"></div>
-            <div id="match-label" style="color:var(--primary-color); margin:20px 0;"></div>
+            <div id="match-rate" style="font-size:24px; font-weight:bold; color:white; margin-bottom:5px;"></div>
+            <div id="match-label" style="font-size:18px; color:var(--primary-color); margin-bottom:30px;"></div>
             <button id="match-btn" class="auth-btn" style="width:150px;"></button>
         </div>
     </div>
 
     <div id="main-app">
-        <div style="color:var(--primary-color); font-weight:bold; margin-bottom:10px;">Banyantree Busan</div>
-        <div style="font-size:20px; margin-bottom:30px;">반갑습니다, 회원님.</div>
+        <div style="color:var(--primary-color); font-weight:bold; margin-bottom:10px;">Banyantree Busan Haeundae</div>
+        <div style="font-size:20px; margin-bottom:30px; font-weight:300;">반갑습니다, 회원님.<br><b>컨시어지 서비스를 시작합니다.</b></div>
+        
         <div class="menu-grid">
             <div class="menu-item" onclick="openSub('concierge')"><i class="material-icons">room_service</i><span>Concierge</span></div>
             <div class="menu-item" onclick="openSub('hotel')"><i class="material-icons">apartment</i><span>Hotel Service</span></div>
             <div class="menu-item" onclick="window.open('https://www.banyantree.com', '_blank')"><i class="material-icons">event_available</i><span>Booking</span></div>
-            <div class="menu-item" onclick="alert('발렛 준비 중')"><i class="material-icons">directions_car</i><span>Valet</span></div>
+            <div class="menu-item" onclick="alert('발렛 파킹 확인 중...')"><i class="material-icons">directions_car</i><span>Valet</span></div>
         </div>
     </div>
 
     <div id="sub-concierge" class="sub-screen">
-        <div onclick="closeSub()"><i class="material-icons">arrow_back</i> 뒤로</div>
-        <div class="menu-grid" style="margin-top:20px;">
-            <div class="menu-item"><span>4 Season Tour</span></div>
-            <div class="menu-item"><span>Kids</span></div>
+        <div style="display:flex; align-items:center; color:var(--primary-color); font-weight:bold;" onclick="closeSub()">
+            <i class="material-icons">arrow_back</i>&nbsp;뒤로가기
+        </div>
+        <h2 style="margin-top:30px;">Concierge Service</h2>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="alert('4 Season Tour 리스트를 불러옵니다.')"><i class="material-icons">map</i><span>4 Season Tour</span></div>
+            <div class="menu-item"><i class="material-icons">child_friendly</i><span>Kids</span></div>
+            <div class="menu-item"><i class="material-icons">local_car_wash</i><span>Car Wash</span></div>
+            <div class="menu-item"><i class="material-icons">medical_services</i><span>Hospital</span></div>
+        </div>
+    </div>
+
+    <div id="sub-hotel" class="sub-screen">
+        <div style="display:flex; align-items:center; color:var(--primary-color); font-weight:bold;" onclick="closeSub()">
+            <i class="material-icons">arrow_back</i>&nbsp;뒤로가기
+        </div>
+        <h2 style="margin-top:30px;">Hotel Service</h2>
+        <div class="menu-grid">
+            <div class="menu-item"><span>Dining</span></div>
+            <div class="menu-item"><span>Lounge</span></div>
+            <div class="menu-item"><span>Wellness</span></div>
+            <div class="menu-item"><span>Facilities</span></div>
+            <div class="menu-item"><span>Kids Club</span></div>
+            <div class="menu-item"><span>연회/웨딩</span></div>
         </div>
     </div>
 </div>
 
 <script>
-    // 제공해주신 '웹에 게시'용 CSV 주소
+    /* =========================================================================
+       [데이터 연동 및 디버깅]
+    ========================================================================== */
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjdw6b40uOKNdnSDIL0Hmz_5wiRsJV6WznPvR_fNAmneePy-JcE6DIlC5E_Asdhb-jGeh_01VzR8H-/pub?output=csv";
     
     let faceMatcher = null;
     let isProcessing = false;
 
-    // 구글 드라이브 링크를 이미지 파일 주소로 변환하는 함수
+    // 구글 드라이브 링크를 이미지 파일 주소로 강제 변환
     function fixDriveUrl(url) {
-        if (url.includes('drive.google.com')) {
-            const id = url.split('/d/')[1]?.split('/')[0];
-            return id ? `https://docs.google.com/uc?export=view&id=${id}` : url;
+        if (!url) return "";
+        let cleanUrl = url.replace(/"/g, '').trim();
+        if (cleanUrl.includes('drive.google.com')) {
+            const match = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://docs.google.com/uc?export=view&id=${match[1]}`;
+            }
         }
-        return url;
+        return cleanUrl;
     }
 
     async function loadData() {
         const status = document.getElementById('face-status');
         try {
+            console.log("1. 시트 데이터 가져오기 시작...");
             const res = await fetch(SHEET_URL);
-            const data = await res.text();
-            const rows = data.split('\n').map(r => r.split(',')).slice(1);
-            const labeled = [];
+            const csvText = await res.text();
+            
+            // 데이터 파싱 (쉼표 기준)
+            const rows = csvText.split('\n').map(r => r.split(','));
+            console.log("2. 불러온 원본 행 개수:", rows.length);
+            console.log("3. 데이터 샘플(첫 행 제외):", rows[1]);
 
-            for (const row of rows) {
+            const labeledDescriptors = [];
+
+            // 1행(제목) 건너뛰고 2행부터 분석
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
                 if (row.length < 2) continue;
+
                 const name = row[0].replace(/"/g, '').trim();
                 const rawUrl = row[1].replace(/"/g, '').trim();
                 const imgUrl = fixDriveUrl(rawUrl);
 
+                console.log(`- ${name}님 분석 시도 중... URL: ${imgUrl}`);
+
                 try {
                     const img = await faceapi.fetchImage(imgUrl);
-                    const det = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
-                    if (det) labeled.push(new faceapi.LabeledFaceDescriptors(name, [det.descriptor]));
-                } catch (e) { console.error(name + " 사진 로드 실패"); }
+                    const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+                                                .withFaceLandmarks()
+                                                .withFaceDescriptor();
+                    
+                    if (detection) {
+                        labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(name, [detection.descriptor]));
+                        console.log(`   [성공] ${name}님 얼굴 특징 추출 완료`);
+                    } else {
+                        console.warn(`   [실패] ${name}님 사진에서 얼굴을 찾을 수 없음`);
+                    }
+                } catch (imgErr) {
+                    console.error(`   [오류] ${name}님 이미지 로드 실패:`, imgErr);
+                }
             }
 
-            if (labeled.length === 0) throw new Error("분석 가능한 사진 없음");
-            faceMatcher = new faceapi.FaceMatcher(labeled, 0.6);
-            status.innerText = "스캔 중... 얼굴을 맞춰주세요.";
-            startScan();
+            if (labeledDescriptors.length === 0) {
+                throw new Error("유효한 회원 데이터가 없습니다.");
+            }
+
+            faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
+            status.innerText = "스캔 준비 완료. 카메라를 정면으로 봐주세요.";
+            startRealtimeDetection();
+
         } catch (err) {
-            status.innerHTML = "연동 실패: 시트 첫 줄(제목)과<br>데이터(이름, 사진URL)를 확인하세요.";
+            console.error("최종 에러:", err);
+            status.innerHTML = `<span style="color:#ff6b6b">연동 실패</span><br><small>시트 구조나 사진 권한을 확인하세요.</small>`;
         }
     }
-// 코드 중간에 이 부분을 넣어 데이터가 어떻게 찍히는지 확인해보세요.
-const rows = data.split('\n').map(r => r.split(','));
-console.log("불러온 전체 데이터:", rows);
-        }
-    }
-    async function startScan() {
+
+    async function startRealtimeDetection() {
         const video = document.getElementById('video-feed');
-        setInterval(async () => {
+        const interval = setInterval(async () => {
             if (isProcessing || !faceMatcher) return;
-            const det = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
-            if (det.length > 0) {
+
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                                            .withFaceLandmarks()
+                                            .withFaceDescriptors();
+
+            if (detections.length > 0) {
                 isProcessing = true;
-                const match = faceMatcher.findBestMatch(det[0].descriptor);
-                const rate = Math.round((1 - match.distance) * 100);
-                if (rate > 60) showResult(match.label, rate);
-                else isProcessing = false;
+                const bestMatch = faceMatcher.findBestMatch(detections[0].descriptor);
+                const matchRate = Math.round((1 - bestMatch.distance) * 100);
+
+                if (matchRate >= 60) {
+                    clearInterval(interval);
+                    showResultPopup(bestMatch.label, matchRate);
+                } else {
+                    isProcessing = false;
+                }
             }
         }, 1000);
     }
 
-    function showResult(name, rate) {
+    function showResultPopup(name, rate) {
         const popup = document.getElementById('match-popup');
-        popup.style.display = 'flex';
-        document.getElementById('match-rate').innerText = `매치율 ${rate}%`;
-        document.getElementById('match-label').innerText = name === 'unknown' ? '등록되지 않은 인원' : `환영합니다, ${name}님`;
+        const rateText = document.getElementById('match-rate');
+        const labelText = document.getElementById('match-label');
         const btn = document.getElementById('match-btn');
-        btn.innerText = rate >= 70 ? "접속 승인" : "재시도";
-        btn.onclick = () => {
-            if (rate >= 70) {
+
+        popup.style.display = 'flex';
+        rateText.innerText = `매치율 ${rate}%`;
+        labelText.innerText = name === 'unknown' ? "등록되지 않은 인원입니다." : `${name} 회원님 환영합니다.`;
+        
+        if (rate >= 70 && name !== 'unknown') {
+            btn.innerText = "서비스 입장";
+            btn.style.backgroundColor = "var(--primary-color)";
+            btn.onclick = () => {
                 document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('main-app').style.display = 'flex';
-            } else location.reload();
-        };
+            };
+        } else {
+            btn.innerText = "재시도";
+            btn.style.backgroundColor = "#555";
+            btn.onclick = () => location.reload();
+        }
     }
 
+    /* [기본 기능] */
     async function showAuthStep(step) {
         document.getElementById('auth-main').style.display = 'none';
         if (step === 'face') {
             document.getElementById('auth-face').style.display = 'flex';
-            const modelUrl = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-            await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
-            await faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl);
-            await faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl);
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById('video-feed').srcObject = stream;
-            loadData();
+            try {
+                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                ]);
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('video-feed').srcObject = stream;
+                loadData();
+            } catch (e) {
+                alert("카메라 권한이 필요합니다.");
+                location.reload();
+            }
         } else {
             document.getElementById('auth-code').style.display = 'flex';
         }
     }
+
+    function checkCode() {
+        const code = document.getElementById('access-code').value.trim();
+        if (code.toLowerCase() === "foryou") {
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+        } else {
+            alert("코드가 틀렸습니다.");
+        }
+    }
+
     function openSub(id) { document.getElementById('main-app').style.display='none'; document.getElementById('sub-'+id).style.display='flex'; }
     function closeSub() { document.querySelectorAll('.sub-screen').forEach(s=>s.style.display='none'); document.getElementById('main-app').style.display='flex'; }
 </script>
