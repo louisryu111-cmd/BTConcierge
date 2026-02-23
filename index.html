@@ -40,12 +40,12 @@
         .menu-item i { font-size: 35px; color: var(--primary-color); margin-bottom: 10px; }
         .menu-item span { font-size: 14px; text-align: center; color: #eee; font-weight: 500; }
 
-        /* 서브 스크린 */
+        /* 서브 화면 */
         .sub-screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 500; padding: 25px 20px; box-sizing: border-box; flex-direction: column; }
         .screen-header { display: flex; align-items: center; margin-bottom: 25px; font-size: 18px; font-weight: bold; color: var(--primary-color); }
         .screen-header i { margin-right: 15px; cursor: pointer; }
 
-        /* 하단 바 */
+        /* 하단 영역 (Hotel Map 반영) */
         #footer-area { background-color: #0a0a0a; border-top: 1px solid #222; padding: 15px 0 25px 0; display: flex; flex-direction: column; align-items: center; }
         .map-trigger { color: var(--primary-color); display: flex; flex-direction: column; align-items: center; cursor: pointer; margin-bottom: 15px; }
         .copyright-text { font-size: 10px; color: #555; text-align: center; line-height: 1.5; padding: 0 20px; }
@@ -75,7 +75,7 @@
             <div id="face-status" style="color:var(--primary-color); text-align:center; font-size:13px; height:40px; padding:0 20px;">
                 서버에서 회원 데이터를 불러오는 중...
             </div>
-            <button class="auth-btn" style="background:none; border:none; color:#666;" onclick="location.reload()">취소</button>
+            <button class="auth-btn" style="background:none; border:none; color:#666;" onclick="location.reload()">취소 후 돌아가기</button>
         </div>
 
         <div id="auth-code" class="auth-screen" style="display:none;">
@@ -146,21 +146,22 @@
 </div>
 
 <script>
-    // 구글 시트 데이터 URL (CSV 방식)
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/17oKJndkco4jJToJiUuEuHnFqhPlwIsEYycHiCZtFP6E/edit?usp=sharing";
+    /* -------------------------------------------------------------------------
+       [중요] 업데이트된 구글 시트 데이터 URL
+    -------------------------------------------------------------------------- */
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/17oKJndkco4jJToJiUuEuHnFqhPlwIsEYycHiCZtFP6E/gviz/tq?tqx=out:csv";
     
     let faceMatcher = null;
     let cameraStream = null;
     let isProcessing = false;
 
-    // 1. 구글 시트에서 회원 데이터 및 이미지 학습
+    // 시트에서 회원 데이터 로드 및 학습
     async function loadMemberDataFromSheet() {
         const status = document.getElementById('face-status');
         try {
             const response = await fetch(SHEET_CSV_URL);
             const csvText = await response.text();
             
-            // CSV 파싱 (단순화: 1열 이름, 2열 이미지URL 가정)
             const rows = csvText.split('\n').slice(1);
             const labeledDescriptors = [];
 
@@ -179,24 +180,22 @@
                     if (detection) {
                         labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(name, [detection.descriptor]));
                     }
-                } catch (e) { console.log(`${name} 사진 로드 실패`); }
+                } catch (e) { console.log(`${name} 데이터 처리 중 오류`); }
             }
 
-            if (labeledDescriptors.length === 0) throw new Error("학습된 회원이 없습니다.");
+            if (labeledDescriptors.length === 0) throw new Error("회원 데이터가 없습니다.");
             
-            faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6); // 기본 임계값 0.6
-            status.innerText = "데이터 로드 완료. 얼굴을 스캔합니다.";
+            faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
+            status.innerText = "스캔 준비 완료. 얼굴을 정면에 맞춰주세요.";
             startRealtimeDetection();
         } catch (err) {
-            status.innerText = "회원 데이터를 불러오지 못했습니다. (권한 확인 필요)";
-            console.error(err);
+            status.innerText = "회원 정보를 불러오지 못했습니다. 시트 권한을 확인하세요.";
         }
     }
 
-    // 2. 실시간 안면 인식 및 대조 로직 (시뮬레이션 없음)
+    // 실시간 안면 인식 로직
     async function startRealtimeDetection() {
         const video = document.getElementById('video-feed');
-        
         const interval = setInterval(async () => {
             if (isProcessing || !faceMatcher) return;
 
@@ -207,8 +206,6 @@
             if (detections.length > 0) {
                 isProcessing = true;
                 const bestMatch = faceMatcher.findBestMatch(detections[0].descriptor);
-                
-                // 유클리드 거리를 퍼센트로 변환 (거리가 0일수록 100%)
                 const distance = bestMatch.distance;
                 const matchRate = Math.round((1 - distance) * 100);
 
@@ -216,7 +213,7 @@
                     clearInterval(interval);
                     showRealResult(bestMatch.label, matchRate);
                 } else {
-                    isProcessing = false; // 62% 미만은 계속 스캔
+                    isProcessing = false;
                 }
             }
         }, 1000);
@@ -231,13 +228,11 @@
 
         popup.style.display = 'flex';
         rateText.innerText = `매치율 ${rate}%`;
-        // 구글 시트의 해당 회원 사진을 결과창에 송출 (실제 운영 반영)
-        // 여기서는 예시로 시트에서 가져온 정보를 활용한다고 가정
         photo.src = "https://via.placeholder.com/150/8E7958/FFFFFF?text=" + encodeURIComponent(name);
 
         if (rate >= 70) {
             labelText.innerText = "“유력함”";
-            btn.innerText = "접속 완료";
+            btn.innerText = "로그인 완료";
             btn.style.backgroundColor = "var(--primary-color)";
             btn.onclick = () => {
                 stopCamera();
@@ -252,12 +247,11 @@
         }
     }
 
-    // 기초 인프라 로직 (기존 유지)
+    // 기본 제어 로직
     async function showAuthStep(step) {
         document.getElementById('auth-main').style.display = 'none';
         if(step === 'face') {
             document.getElementById('auth-face').style.display = 'flex';
-            const status = document.getElementById('face-status');
             try {
                 await Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'),
@@ -267,7 +261,7 @@
                 cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
                 document.getElementById('video-feed').srcObject = cameraStream;
                 loadMemberDataFromSheet();
-            } catch (e) { status.innerText = "카메라 또는 모델 로드 실패"; }
+            } catch (e) { alert("카메라 로드 실패"); }
         } else {
             document.getElementById('auth-code').style.display = 'flex';
         }
@@ -289,7 +283,7 @@
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         rec.lang='ko-KR'; rec.start(); rec.onresult=(e)=>document.getElementById(id).value=e.results[0][0].transcript;
     }
-    function runValetCheck() { alert("호텔 내 위치 확인 중..."); openSub('concierge'); /* 시연용 */ }
+    function runValetCheck() { alert("호텔 내 위치를 확인합니다."); openSub('concierge'); }
 </script>
 </body>
 </html>
