@@ -38,12 +38,12 @@
         .sub-screen { display: none; position: absolute; inset: 0; background-color: var(--bg-color); z-index: 500; padding: 25px 20px; flex-direction: column; overflow-y: auto; }
         .back-btn { color: var(--primary-color); display: flex; align-items: center; cursor: pointer; margin-bottom: 20px; }
 
-        /* 입력 그룹 (인증코드 & 발렛) */
+        /* 입력 그룹 */
         .input-group { position: relative; width: 80%; margin-bottom: 20px; align-self: center; }
         .styled-input { width: 100%; padding: 15px; padding-right: 50px; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:10px; text-align:center; box-sizing: border-box; font-size: 16px; }
         .mic-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary-color); cursor: pointer; }
 
-        /* 바텀 시트 (4 Season Tour) */
+        /* 바텀 시트 */
         #bottom-sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; }
         #bottom-sheet { display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 30px 20px; z-index: 1001; box-sizing: border-box; transition: transform 0.3s ease; }
         .sub-list-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: #252525; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
@@ -57,17 +57,25 @@
             <div class="logo-intro">BANYAN TREE<br><span style="font-size:14px; color:#aaa;">BUSAN HAEUNDAE</span></div>
             <button class="auth-btn" onclick="showAuthStep('face')"><i class="material-icons">face</i>안면인식 로그인</button>
             <button class="auth-btn" onclick="showAuthStep('code')"><i class="material-icons">vpn_key</i>인증 코드로 로그인</button>
+            
+            <div style="position:absolute; bottom:40px; width:80%; font-size:11px; color:#666; text-align:center; line-height:1.6;">
+                반얀트리 부산 회원을 위한 Exclusive Service 입니다.<br>서비스 이용 시 모바일 데이터가 발생 될 수 있습니다.
+            </div>
         </div>
 
         <div id="auth-face" class="auth-screen" style="display:none;">
-            <div class="logo-intro" style="margin-bottom:20px; font-size:18px;">FACE ID VERIFICATION</div>
+            <div style="width:85%; font-size:12px; color:var(--primary-color); text-align:center; margin-bottom:20px; line-height:1.5;">
+                해당 서비스는 호텔의 개인정보 이용 방침에 동의하신 분만 안면 인식 로그인을 이용해 주시기 바랍니다.
+            </div>
             <div class="camera-container">
                 <video id="video-feed" autoplay muted playsinline></video>
                 <div class="scan-line"></div>
             </div>
-            <div id="face-status">시스템 초기화 중...</div>
+            <div id="face-status">시스템 부팅 중</div>
             <div id="debug-log"></div>
-            <button class="auth-btn" style="background:none; border:none; color:#666; margin-top:10px;" onclick="location.reload()">뒤로가기</button>
+            
+            <button id="start-matching-btn" class="auth-btn" style="background:var(--primary-color); margin-top:10px;" onclick="beginFaceRecognition()">안면인식 시작</button>
+            <button class="auth-btn" style="background:none; border:none; color:#666; margin-top:5px;" onclick="location.reload()">뒤로가기</button>
         </div>
 
         <div id="auth-code" class="auth-screen" style="display:none;">
@@ -103,8 +111,8 @@
         <div class="menu-grid">
             <div class="menu-item" onclick="openTour()"><i class="material-icons">map</i><span>4 Season Tour</span></div>
             <div class="menu-item" onclick="alert('Kids 서비스 준비 중')"><i class="material-icons">child_friendly</i><span>Kids</span></div>
-            <div class="menu-item" onclick="CarWash('CarWash 서비스 준비 중')"><i class="material-icons">local_car_wash</i><span>Car Wash</span></div>
-            <div class="menu-item" onclick="window.open('https://www.banyantree.com', '_blank')"><i class="material-icons">medical_services</i><span>Hospital</span></div>
+            <div class="menu-item" onclick="alert('세차 예약 서비스')"><i class="material-icons">local_car_wash</i><span>Car Wash</span></div>
+            <div class="menu-item" onclick="window.open('https://www.e-gen.or.kr/egen/egenmain.do', '_blank')"><i class="material-icons">medical_services</i><span>Hospital</span></div>
         </div>
     </div>
 
@@ -125,15 +133,11 @@
         <div class="back-btn" onclick="closeSub()"><i class="material-icons">arrow_back</i> 뒤로가기</div>
         <h2 style="margin-bottom:10px;">Valet Service</h2>
         <p style="font-size:13px; color:#aaa; line-height:1.6; margin-bottom:25px;">호텔 내 체류중인 고객님을 위한 출차 전용 서비스입니다. 호텔내에 위치 하실때 서비스가 제공됩니다.</p>
-        
         <div class="input-group" style="width:100%;">
             <input type="text" id="car-number" class="styled-input" placeholder="차량번호를 입력하세요 (예: 12가 3456)">
             <i class="material-icons mic-btn" onclick="startVoiceRecognition('car-number')">mic</i>
         </div>
-        
         <button class="auth-btn" style="width:100%; background:var(--primary-color); margin-top:10px;" onclick="requestValet()">출차 요청하기</button>
-
-        </div>
     </div>
 
     <div id="bottom-sheet-overlay" onclick="closeTour()"></div>
@@ -151,13 +155,13 @@
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjdw6b40uOKNdnSDIL0Hmz_5wiRsJV6WznPvR_fNAmneePy-JcE6DIlC5E_Asdhb-jGeh_01VzR8H-/pub?output=csv";
     let faceMatcher = null;
     let isDetected = false;
+    let recognitionTimeout = null; // 타임아웃 관리를 위한 변수
 
     function log(m) {
         const d = document.getElementById('debug-log');
         if(d) { d.innerHTML += `> ${m}<br>`; d.scrollTop = d.scrollHeight; }
     }
 
-    // 안면 인식 관련 로직 (기존 유지)
     function fixUrl(url) {
         if (!url) return "";
         let id = "";
@@ -170,12 +174,21 @@
 
     async function showAuthStep(step) {
         document.getElementById('auth-main').style.display = 'none';
-        if (step === 'face') { document.getElementById('auth-face').style.display = 'flex'; initFaceAuth(); }
-        else { document.getElementById('auth-code').style.display = 'flex'; }
+        document.getElementById('auth-face').style.display = 'none';
+        document.getElementById('auth-code').style.display = 'none';
+        
+        if (step === 'face') { 
+            document.getElementById('auth-face').style.display = 'flex'; 
+            initFaceAuth(); 
+        } else { 
+            document.getElementById('auth-code').style.display = 'flex'; 
+        }
     }
 
+    // 모델 로딩 및 카메라 활성화까지만 수행 (분석은 시작하지 않음)
     async function initFaceAuth() {
         try {
+            const status = document.getElementById('face-status');
             const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
             await Promise.all([
                 faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
@@ -186,8 +199,24 @@
             const video = document.getElementById('video-feed');
             video.srcObject = stream;
             video.onloadedmetadata = () => video.play();
-            loadData();
+            status.innerText = "부팅 완료. 시작 버튼을 누르세요.";
         } catch (e) { log("카메라 에러"); }
+    }
+
+    // 요청사항 4번: 인식 시작 버튼 클릭 시 작동하는 함수
+    async function beginFaceRecognition() {
+        document.getElementById('start-matching-btn').style.display = 'none';
+        document.getElementById('face-status').innerText = "회원 인식 진행 중...";
+        
+        // 요청사항 1번: 7초 타이머 설정
+        recognitionTimeout = setTimeout(() => {
+            if (!isDetected) {
+                document.getElementById('face-status').innerHTML = "<span style='color:red;'>인식 불일치 (7초 초과)</span>";
+                setTimeout(() => { showAuthStep('code'); }, 1500); // 1.5초 후 코드입력 화면으로 이동
+            }
+        }, 7000);
+
+        loadData(); // 데이터 로드 후 바로 분석 시작
     }
 
     async function loadData() {
@@ -210,7 +239,6 @@
                 } catch (e) {}
             }
             faceMatcher = new faceapi.FaceMatcher(labeled, 0.45);
-            document.getElementById('face-status').innerText = "인식 준비 완료 및 인식 시작";
             startRecognition();
         } catch (e) { log("데이터 연동 실패"); }
     }
@@ -225,6 +253,7 @@
                 const score = Math.round((1 - match.distance) * 100);
                 if (score >= 70 && match.label !== "unknown") {
                     isDetected = true;
+                    clearTimeout(recognitionTimeout); // 매칭 성공 시 타이머 중단
                     const displayName = (score >= 76) ? match.label : "회원";
                     loginSuccess(displayName);
                     return;
@@ -235,7 +264,6 @@
         scan();
     }
 
-    // 공통 기능
     function loginSuccess(name) {
         document.getElementById('auth-overlay').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
@@ -249,7 +277,6 @@
         else alert("코드가 일치하지 않습니다.");
     }
 
-    // 음성 인식 (STT) 통합 함수
     function startVoiceRecognition(targetId) {
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'ko-KR';
@@ -261,19 +288,15 @@
         };
     }
 
-    // 화면 전환 및 바텀 시트
     function openSub(id) { document.getElementById('main-app').style.display='none'; document.getElementById('sub-'+id).style.display='flex'; }
     function closeSub() { document.querySelectorAll('.sub-screen').forEach(s=>s.style.display='none'); document.getElementById('main-app').style.display='flex'; }
-    
     function openTour() { document.getElementById('bottom-sheet-overlay').style.display='block'; document.getElementById('bottom-sheet').style.display='block'; }
     function closeTour() { document.getElementById('bottom-sheet-overlay').style.display='none'; document.getElementById('bottom-sheet').style.display='none'; }
 
-    // 발렛 출차 요청 (반얀트리 Duve 연동 예정)
     function requestValet() {
         const carNum = document.getElementById('car-number').value;
         if(!carNum) { alert("차량 번호를 입력해주세요."); return; }
-        alert(`${carNum} 차량의 출차 요청이 반얀트리 Duve 시스템으로 전송되었습니다. 차량은 1층에 준비해 놓겠습니다.`);
-        // window.open('DUVE_LINK_HERE?car=' + encodeURIComponent(carNum)); // 링크 확정 시 주석 해제
+        alert(`${carNum} 차량의 출차 요청이 반얀트리 Duve 시스템으로 전송되었습니다. 차량은 약 10분뒤 호텔 1층에 준비해 놓겠습니다.`);
     }
 </script>
 </body>
