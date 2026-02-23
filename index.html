@@ -210,7 +210,7 @@
                 } catch (e) {}
             }
             faceMatcher = new faceapi.FaceMatcher(labeled, 0.45);
-            document.getElementById('face-status').innerText = "인식 준비 완료!";
+            document.getElementById('face-status').innerText = "인식 준비 완료 및 인식 시작";
             startRecognition();
         } catch (e) { log("데이터 연동 실패"); }
     }
@@ -272,7 +272,7 @@
     function requestValet() {
         const carNum = document.getElementById('car-number').value;
         if(!carNum) { alert("차량 번호를 입력해주세요."); return; }
-        alert(`${carNum} 차량의 출차 요청이 반얀트리 Duve 시스템으로 전송되었습니다.`);
+        alert(`${carNum} 차량의 출차 요청이 반얀트리 Duve 시스템으로 전송되었습니다. 차량은 1층에 준비해 놓겠습니다.`);
         // window.open('DUVE_LINK_HERE?car=' + encodeURIComponent(carNum)); // 링크 확정 시 주석 해제
     }
 </script>
