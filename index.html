@@ -38,7 +38,6 @@
         .menu-item { background-color: var(--card-bg); border-radius: 15px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #333; cursor: pointer; text-align: center; padding: 5px; }
         .menu-item i { font-size: 35px; color: var(--primary-color); margin-bottom: 10px; }
         
-        /* 수정됨: 하단 Copyright 문구를 위로 올리기 위해 bottom padding 추가 */
         .footer { margin-top: auto; padding: 20px 0 10vh 0; text-align: center; font-size: 11px; color: #555; letter-spacing: 1px; }
         
         .sub-screen { display: none; position: absolute; inset: 0; background-color: var(--bg-color); z-index: 500; padding: 25px 20px; flex-direction: column; overflow-y: auto; }
@@ -99,7 +98,7 @@
         
         <div class="menu-grid">
             <div class="menu-item" onclick="openSub('concierge')"><i class="material-icons">room_service</i><span>Concierge</span></div>
-            <div class="menu-item" onclick="openSub('hotel')"><i class="material-icons">apartment</i><span>Hotel Service</span></div>
+            <div class="menu-item" onclick="openSub('hotel')"><i class="material-icons">apartment</i><span>Hotel Amenities</span></div>
             <div class="menu-item" onclick="window.open('https://www.banyantree.com', '_blank')"><i class="material-icons">event_available</i><span>Booking</span></div>
             <div class="menu-item" onclick="openSub('valet')"><i class="material-icons">directions_car</i><span>Valet</span></div>
         </div>
@@ -111,6 +110,7 @@
         <h2 style="margin-bottom:25px;">Concierge Service</h2>
         <div class="menu-grid">
             <div class="menu-item" onclick="openTour()"><i class="material-icons">map</i><span>4 Season Tour</span></div>
+            <div class="menu-item" onclick="window.open('https://drive.google.com/file/d/1X-pM_hO7yY8Z-E2s-l8kU-z9q9q9q9q9/view?usp=sharing', '_blank')"><i class="material-icons">map</i><span>Hotel Map</span></div>
             <div class="menu-item" onclick="alert('Kids 서비스 준비 중')"><i class="material-icons">child_friendly</i><span>Kids</span></div>
             <div class="menu-item" onclick="alert('세차 예약 서비스')"><i class="material-icons">local_car_wash</i><span>Car Wash</span></div>
             <div class="menu-item" onclick="window.open('https://www.e-gen.or.kr/egen/egenmain.do', '_blank')"><i class="material-icons">medical_services</i><span>Hospital</span></div>
@@ -119,14 +119,14 @@
 
     <div id="sub-hotel" class="sub-screen">
         <div class="back-btn" onclick="closeSub()"><i class="material-icons">arrow_back</i> 뒤로가기</div>
-        <h2 style="margin-bottom:25px;">Hotel Service</h2>
+        <h2 style="margin-bottom:25px;">Hotel Amenities</h2>
         <div class="menu-grid">
-            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">restaurant</i><span>Dining</span></div>
-            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">local_bar</i><span>Lounge</span></div>
-            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">spa</i><span>Wellness</span></div>
-            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">pool</i><span>Facilities</span></div>
-            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">child_care</i><span>Kids</span></div>
-            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">celebration</i><span>Event & Wedding</span></div>
+            <div class="menu-item" onclick="alert('준비 중입니다.')"><i class="material-icons">restaurant</i><span>Dining</span></div>
+            <div class="menu-item" onclick="alert('준비 중입니다.')"><i class="material-icons">local_bar</i><span>Lounge</span></div>
+            <div class="menu-item" onclick="alert('준비 중입니다.')"><i class="material-icons">spa</i><span>Wellness & Spa</span></div>
+            <div class="menu-item" onclick="alert('준비 중입니다.')"><i class="material-icons">pool</i><span>Facilities</span></div>
+            <div class="menu-item" onclick="alert('준비 중입니다.')"><i class="material-icons">child_care</i><span>Kids</span></div>
+            <div class="menu-item" onclick="alert('준비 중입니다.')"><i class="material-icons">celebration</i><span>Event & Wedding</span></div>
         </div>
     </div>
 
