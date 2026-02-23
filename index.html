@@ -11,10 +11,17 @@
         body { margin: 0; padding: 0; background-color: #000; font-family: 'Noto Sans KR', sans-serif; color: var(--text-color); overflow: hidden; }
         #app-container { max-width: 480px; margin: 0 auto; background-color: var(--bg-color); height: 100vh; position: relative; display: flex; flex-direction: column; }
         
-        /* 인증 레이어 */
+        /* 인증 레이어 - 레이아웃 위로 올림 */
         #auth-overlay { position: absolute; inset: 0; z-index: 2000; background: #000; }
-        .auth-screen { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; inset: 0; }
-        .logo-intro { font-size: 22px; font-weight: 300; letter-spacing: 2px; margin-bottom: 50px; color: var(--primary-color); text-align: center; }
+        .auth-screen { 
+            width: 100%; height: 100%; 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: flex-start; /* 중앙 정렬에서 상단 정렬로 변경 */
+            padding-top: 15vh; /* 화면의 15% 지점부터 시작하도록 설정 */
+            position: absolute; inset: 0; 
+            box-sizing: border-box;
+        }
+        .logo-intro { font-size: 22px; font-weight: 300; letter-spacing: 2px; margin-bottom: 40px; color: var(--primary-color); text-align: center; }
         .auth-btn { width: 80%; background-color: var(--card-bg); color: #fff; border: 1px solid var(--primary-color); padding: 18px; border-radius: 12px; font-size: 16px; margin-bottom: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
         /* 안면 인식 UI */
@@ -25,25 +32,17 @@
         #face-status { color: var(--primary-color); text-align: center; font-size: 14px; margin-bottom: 10px; }
         #debug-log { width: 80%; height: 60px; font-size: 10px; color: #666; overflow-y: auto; text-align: left; background: #000; padding: 5px; border-radius: 5px; font-family: monospace; }
 
-        /* 메인 앱 */
+        /* 메인 앱 및 기타 UI */
         #main-app { display: none; flex: 1; flex-direction: column; padding: 25px 20px; overflow-y: auto; }
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .menu-item { background-color: var(--card-bg); border-radius: 15px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #333; cursor: pointer; text-align: center; padding: 5px; }
         .menu-item i { font-size: 35px; color: var(--primary-color); margin-bottom: 10px; }
-        
-        /* 푸터(Copyright) */
         .footer { margin-top: auto; padding: 20px 0; text-align: center; font-size: 11px; color: #555; letter-spacing: 1px; }
-
-        /* 서브 화면 공통 */
         .sub-screen { display: none; position: absolute; inset: 0; background-color: var(--bg-color); z-index: 500; padding: 25px 20px; flex-direction: column; overflow-y: auto; }
         .back-btn { color: var(--primary-color); display: flex; align-items: center; cursor: pointer; margin-bottom: 20px; }
-
-        /* 입력 그룹 */
         .input-group { position: relative; width: 80%; margin-bottom: 20px; align-self: center; }
         .styled-input { width: 100%; padding: 15px; padding-right: 50px; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:10px; text-align:center; box-sizing: border-box; font-size: 16px; }
         .mic-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary-color); cursor: pointer; }
-
-        /* 바텀 시트 */
         #bottom-sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; }
         #bottom-sheet { display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 30px 20px; z-index: 1001; box-sizing: border-box; transition: transform 0.3s ease; }
         .sub-list-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: #252525; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
@@ -58,12 +57,12 @@
             <button class="auth-btn" onclick="showAuthStep('face')"><i class="material-icons">face</i>안면인식 로그인</button>
             <button class="auth-btn" onclick="showAuthStep('code')"><i class="material-icons">vpn_key</i>인증 코드로 로그인</button>
             
-            <div style="position:absolute; bottom:40px; width:80%; font-size:11px; color:#666; text-align:center; line-height:1.6;">
+            <div style="position:absolute; bottom:5vh; width:90%; font-size:11px; color:#666; text-align:center; line-height:1.6;">
                 반얀트리 부산 회원을 위한 Exclusive Service 입니다.<br>서비스 이용 시 모바일 데이터가 발생 될 수 있습니다.
             </div>
         </div>
 
-        <div id="auth-face" class="auth-screen" style="display:none;">
+        <div id="auth-face" class="auth-screen" style="display:none; padding-top: 8vh;">
             <div style="width:85%; font-size:12px; color:var(--primary-color); text-align:center; margin-bottom:20px; line-height:1.5;">
                 해당 서비스는 호텔의 개인정보 이용 방침에 동의하신 분만 안면 인식 로그인을 이용해 주시기 바랍니다.
             </div>
@@ -92,17 +91,13 @@
     <div id="main-app">
         <div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">Banyan Tree Busan</div>
         <div style="font-size:22px; margin-bottom:30px; font-weight:300;">반갑습니다, <b id="user-name">회원</b>님.</div>
-        
         <div class="menu-grid">
             <div class="menu-item" onclick="openSub('concierge')"><i class="material-icons">room_service</i><span>Concierge</span></div>
             <div class="menu-item" onclick="openSub('hotel')"><i class="material-icons">apartment</i><span>Hotel Service</span></div>
             <div class="menu-item" onclick="window.open('https://www.banyantree.com', '_blank')"><i class="material-icons">event_available</i><span>Booking</span></div>
             <div class="menu-item" onclick="openSub('valet')"><i class="material-icons">directions_car</i><span>Valet</span></div>
         </div>
-
-        <div class="footer">
-            COPYRIGHT © BANYAN TREE BUSAN. ALL RIGHTS RESERVED.
-        </div>
+        <div class="footer">COPYRIGHT © BANYAN TREE BUSAN. ALL RIGHTS RESERVED.</div>
     </div>
 
     <div id="sub-concierge" class="sub-screen">
@@ -111,7 +106,7 @@
         <div class="menu-grid">
             <div class="menu-item" onclick="openTour()"><i class="material-icons">map</i><span>4 Season Tour</span></div>
             <div class="menu-item" onclick="alert('Kids 서비스 준비 중')"><i class="material-icons">child_friendly</i><span>Kids</span></div>
-            <div class="menu-item" onclick="alert('세차 예약 서비스')"><i class="material-icons">local_car_wash</i><span>Car Wash</span></div>
+            <div class="menu-item" onclick="alert('세차 서비스 준비 중')"><i class="material-icons">local_car_wash</i><span>Car Wash</span></div>
             <div class="menu-item" onclick="window.open('https://www.e-gen.or.kr/egen/egenmain.do', '_blank')"><i class="material-icons">medical_services</i><span>Hospital</span></div>
         </div>
     </div>
@@ -155,7 +150,7 @@
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjdw6b40uOKNdnSDIL0Hmz_5wiRsJV6WznPvR_fNAmneePy-JcE6DIlC5E_Asdhb-jGeh_01VzR8H-/pub?output=csv";
     let faceMatcher = null;
     let isDetected = false;
-    let recognitionTimeout = null; // 타임아웃 관리를 위한 변수
+    let recognitionTimeout = null;
 
     function log(m) {
         const d = document.getElementById('debug-log');
@@ -176,19 +171,12 @@
         document.getElementById('auth-main').style.display = 'none';
         document.getElementById('auth-face').style.display = 'none';
         document.getElementById('auth-code').style.display = 'none';
-        
-        if (step === 'face') { 
-            document.getElementById('auth-face').style.display = 'flex'; 
-            initFaceAuth(); 
-        } else { 
-            document.getElementById('auth-code').style.display = 'flex'; 
-        }
+        if (step === 'face') { document.getElementById('auth-face').style.display = 'flex'; initFaceAuth(); }
+        else { document.getElementById('auth-code').style.display = 'flex'; }
     }
 
-    // 모델 로딩 및 카메라 활성화까지만 수행 (분석은 시작하지 않음)
     async function initFaceAuth() {
         try {
-            const status = document.getElementById('face-status');
             const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
             await Promise.all([
                 faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
@@ -199,24 +187,23 @@
             const video = document.getElementById('video-feed');
             video.srcObject = stream;
             video.onloadedmetadata = () => video.play();
-            status.innerText = "부팅 완료. 시작 버튼을 누르세요.";
+            document.getElementById('face-status').innerText = "시스템 부팅 완료. 시작 버튼을 누르세요.";
         } catch (e) { log("카메라 에러"); }
     }
 
-    // 요청사항 4번: 인식 시작 버튼 클릭 시 작동하는 함수
+    // 안면인식 시작 및 7초 타임아웃
     async function beginFaceRecognition() {
         document.getElementById('start-matching-btn').style.display = 'none';
         document.getElementById('face-status').innerText = "회원 인식 진행 중...";
         
-        // 요청사항 1번: 7초 타이머 설정
         recognitionTimeout = setTimeout(() => {
             if (!isDetected) {
-                document.getElementById('face-status').innerHTML = "<span style='color:red;'>인식 불일치 (7초 초과)</span>";
-                setTimeout(() => { showAuthStep('code'); }, 1500); // 1.5초 후 코드입력 화면으로 이동
+                document.getElementById('face-status').innerHTML = "<span style='color:white;'>인식 불일치</span>";
+                setTimeout(() => { showAuthStep('code'); }, 1500);
             }
         }, 7000);
 
-        loadData(); // 데이터 로드 후 바로 분석 시작
+        loadData();
     }
 
     async function loadData() {
@@ -231,7 +218,6 @@
                 const name = col[0].trim();
                 const url = fixUrl(col[1].trim());
                 if (!name || !url) continue;
-                log(`회원 이미지 분석 중...`);
                 try {
                     const img = await faceapi.fetchImage(url);
                     const det = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
@@ -253,8 +239,8 @@
                 const score = Math.round((1 - match.distance) * 100);
                 if (score >= 70 && match.label !== "unknown") {
                     isDetected = true;
-                    clearTimeout(recognitionTimeout); // 매칭 성공 시 타이머 중단
-                    const displayName = (score >= 76) ? match.label : "회원";
+                    clearTimeout(recognitionTimeout);
+                    const displayName = (score >= 75) ? match.label : "회원";
                     loginSuccess(displayName);
                     return;
                 }
@@ -282,8 +268,7 @@
         recognition.lang = 'ko-KR';
         recognition.start();
         recognition.onresult = (event) => {
-            const result = event.results[0][0].transcript;
-            document.getElementById(targetId).value = result;
+            document.getElementById(targetId).value = event.results[0][0].transcript;
             if(targetId === 'access-code') checkCode();
         };
     }
@@ -292,11 +277,10 @@
     function closeSub() { document.querySelectorAll('.sub-screen').forEach(s=>s.style.display='none'); document.getElementById('main-app').style.display='flex'; }
     function openTour() { document.getElementById('bottom-sheet-overlay').style.display='block'; document.getElementById('bottom-sheet').style.display='block'; }
     function closeTour() { document.getElementById('bottom-sheet-overlay').style.display='none'; document.getElementById('bottom-sheet').style.display='none'; }
-
     function requestValet() {
         const carNum = document.getElementById('car-number').value;
         if(!carNum) { alert("차량 번호를 입력해주세요."); return; }
-        alert(`${carNum} 차량의 출차 요청이 반얀트리 Duve 시스템으로 전송되었습니다. 차량은 약 10분뒤 호텔 1층에 준비해 놓겠습니다.`);
+        alert(`${carNum} 차량의 출차 요청이 시스템으로 전송되었습니다. 차량은 10분 뒤 호텔 1층에 준비됩니다.`);
     }
 </script>
 </body>
