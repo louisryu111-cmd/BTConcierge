@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Banyan Tree Busan Concierge</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root { --primary-color: #8E7958; --bg-color: #121212; --card-bg: #1E1E1E; --text-color: #FFFFFF; }
+        body { margin: 0; padding: 0; background-color: #000; font-family: 'Noto Sans KR', sans-serif; color: var(--text-color); overflow: hidden; }
+        #app-container { max-width: 480px; margin: 0 auto; background-color: var(--bg-color); height: 100vh; position: relative; display: flex; flex-direction: column; }
+        
+        /* 인증 레이어 */
+        #auth-overlay { position: absolute; inset: 0; z-index: 2000; background: #000; }
+        .auth-screen { 
+            width: 100%; height: 100%; 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: flex-start; 
+            padding-top: 20vh; 
+            position: absolute; inset: 0; 
+            box-sizing: border-box;
+        }
+        .auth-btn { width: 80%; background-color: var(--card-bg); color: #fff; border: 1px solid var(--primary-color); padding: 18px; border-radius: 12px; font-size: 16px; margin-bottom: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        /* 메인 앱 및 메뉴 */
+        #main-app { display: none; flex: 1; flex-direction: column; padding: 25px 20px; overflow-y: auto; }
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .menu-item { background-color: var(--card-bg); border-radius: 15px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #333; cursor: pointer; text-align: center; padding: 5px; }
+        .menu-item i { font-size: 35px; color: var(--primary-color); margin-bottom: 10px; }
+        
+        .footer { margin-top: auto; padding: 20px 0 10vh 0; text-align: center; font-size: 11px; color: #555; letter-spacing: 1px; }
+        
+        .sub-screen { display: none; position: absolute; inset: 0; background-color: var(--bg-color); z-index: 500; padding: 25px 20px; flex-direction: column; overflow-y: auto; }
+        .back-btn { color: var(--primary-color); display: flex; align-items: center; cursor: pointer; margin-bottom: 20px; }
+        
+        .input-group { position: relative; width: 80%; margin-bottom: 20px; align-self: center; }
+        .styled-input { width: 100%; padding: 15px; padding-right: 50px; background:#1a1a1a; color:#fff; border:1px solid #444; border-radius:10px; text-align:center; box-sizing: border-box; font-size: 16px; }
+        .mic-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--primary-color); cursor: pointer; }
+
+        #bottom-sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; }
+        #bottom-sheet { display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 30px 20px; z-index: 1001; box-sizing: border-box; transition: transform 0.3s ease; }
+        .sub-list-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: #252525; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="auth-overlay">
+        <div id="auth-main" class="auth-screen">
+            <div style="margin-bottom: 40px; text-align: center;">
+                <img src="https://lh3.googleusercontent.com/d/1Q0fW3olUvzqPI1f1_IA5gNI4croAjjcE" alt="BANYAN TREE BUSAN" style="width: 220px; height: auto;">
+            </div>
+            
+            <button class="auth-btn" onclick="showAuthStep('code')"><i class="material-icons">vpn_key</i>인증 코드로 로그인</button>
+            
+            <div style="position:absolute; bottom:15vh; width:90%; font-size:11px; color:#666; text-align:center; line-height:1.6;">
+                반얀트리 부산 회원을 위한 Exclusive Service 입니다.<br>서비스 이용 시 모바일 데이터가 발생 될 수 있습니다.
+            </div>
+        </div>
+
+        <div id="auth-code" class="auth-screen" style="display:none;">
+            <div style="margin-bottom: 30px; text-align: center;">
+                <img src="https://lh3.googleusercontent.com/d/1Q0fW3olUvzqPI1f1_IA5gNI4croAjjcE" alt="BANYAN TREE BUSAN" style="width: 200px; height: auto;">
+            </div>
+            
+            <div style="font-size:18px; color:var(--primary-color); margin-bottom: 20px; font-weight:bold;">ENTER ACCESS CODE</div>
+            <div class="input-group">
+                <input type="text" id="access-code" class="styled-input" placeholder="코드를 입력하세요">
+                <i class="material-icons mic-btn" onclick="startVoiceRecognition('access-code')">mic</i>
+            </div>
+            <button class="auth-btn" style="background:var(--primary-color)" onclick="checkCode()">접속</button>
+            <button class="auth-btn" style="background:none; border:none; color:#666;" onclick="location.reload()">뒤로가기</button>
+        </div>
+    </div>
+
+    <div id="main-app">
+        <div style="color:var(--primary-color); font-weight:bold; margin-bottom:5px;">Banyan Tree Busan</div>
+        <div style="font-size:22px; margin-bottom:30px; font-weight:300;">반갑습니다, <b id="user-name">회원</b>님.</div>
+        
+        <div class="menu-grid">
+            <div class="menu-item" onclick="checkConciergeAccess()"><i class="material-icons">room_service</i><span>Concierge Club</span></div>
+            <div class="menu-item" onclick="openSub('hotel')"><i class="material-icons">apartment</i><span>Hotel Amenities</span></div>
+            <div class="menu-item" onclick="window.open('https://www.banyantree.com', '_blank')"><i class="material-icons">event_available</i><span>Booking</span></div>
+            <div class="menu-item" onclick="openSub('valet')"><i class="material-icons">directions_car</i><span>Valet</span></div>
+        </div>
+        <div class="footer">COPYRIGHT © BANYAN TREE BUSAN. ALL RIGHTS RESERVED.</div>
+    </div>
+
+    <div id="sub-concierge" class="sub-screen">
+        <div class="back-btn" onclick="closeSub()"><i class="material-icons">arrow_back</i> 뒤로가기</div>
+        <h2 style="margin-bottom:25px;">Concierge Club</h2>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="openTour()"><i class="material-icons">map</i><span>4 Season Tour</span></div>
+            <div class="menu-item" onclick="window.open('https://drive.google.com/file/d/1X-pM_hO7yY8Z-E2s-l8kU-z9q9q9q9q9/view?usp=sharing', '_blank')"><i class="material-icons">map</i><span>Hotel Map</span></div>
+            <div class="menu-item" onclick="alert('Kids 서비스 준비 중')"><i class="material-icons">child_friendly</i><span>Kids</span></div>
+            <div class="menu-item" onclick="alert('세차 예약 서비스')"><i class="material-icons">local_car_wash</i><span>Car Wash</span></div>
+            <div class="menu-item" onclick="window.open('https://www.e-gen.or.kr/egen/egenmain.do', '_blank')"><i class="material-icons">medical_services</i><span>Hospital</span></div>
+        </div>
+    </div>
+
+    <div id="sub-hotel" class="sub-screen">
+        <div class="back-btn" onclick="closeSub()"><i class="material-icons">arrow_back</i> 뒤로가기</div>
+        <h2 style="margin-bottom:25px;">Hotel Amenities</h2>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">restaurant</i><span>Dining</span></div>
+            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">local_bar</i><span>Lounge</span></div>
+            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">spa</i><span>Wellness & Spa</span></div>
+            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">pool</i><span>Facilities</span></div>
+            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">child_care</i><span>Kids</span></div>
+            <div class="menu-item" onclick="alert('홈페이지 구축 후 링크 연결 예정입니다.')"><i class="material-icons">celebration</i><span>Event & Wedding</span></div>
+        </div>
+    </div>
+
+    <div id="sub-valet" class="sub-screen">
+        <div class="back-btn" onclick="closeSub()"><i class="material-icons">arrow_back</i> 뒤로가기</div>
+        <h2 style="margin-bottom:10px;">Valet Service</h2>
+        <p style="font-size:13px; color:#aaa; line-height:1.6; margin-bottom:25px;">호텔 내 체류중인 고객님을 위한 출차 전용 서비스입니다. <br> 호텔내에 위치 하실때 서비스가 제공됩니다.</p>
+        <div class="input-group" style="width:100%;">
+            <input type="text" id="car-number" class="styled-input" placeholder="차량번호를 입력하세요 (예: 12가 3456)">
+            <i class="material-icons mic-btn" onclick="startVoiceRecognition('car-number')">mic</i>
+        </div>
+        <button class="auth-btn" style="width:100%; background:var(--primary-color); margin-top:10px;" onclick="requestValet()">출차 요청하기</button>
+    </div>
+
+    <div id="bottom-sheet-overlay" onclick="closeTour()"></div>
+    <div id="bottom-sheet">
+        <div style="color:var(--primary-color); font-weight:bold; margin-bottom:20px; font-size:18px;">4 Season Tour Drive</div>
+        <div class="sub-list-item" onclick="window.open('https://drive.google.com/file/d/1Ax4O2b49CM5I6-KnMebXjz9r8PHlgUmz/view')"><span>🌸 Spring Course</span><i class="material-icons">chevron_right</i></div>
+        <div class="sub-list-item" onclick="window.open('https://drive.google.com/file/d/1m1nqU2eRtS4YHKAPKqYEekQn7KF0i_sp/view')"><span>🌊 Summer Course</span><i class="material-icons">chevron_right</i></div>
+        <div class="sub-list-item" onclick="window.open('https://drive.google.com/file/d/1d84lGgWJuSJUh3F-AJThTIq-B-t9usRd/view')"><span>🍂 Autumn Course</span><i class="material-icons">chevron_right</i></div>
+        <div class="sub-list-item" onclick="window.open('https://drive.google.com/file/d/1YpcJG6XhzOfaR_e0iDOY0y2yXt5f0t8S/view')"><span>❄️ Winter Course</span><i class="material-icons">chevron_right</i></div>
+        <button class="auth-btn" style="width:100%; margin-top:15px; background:#333; border:none;" onclick="closeTour()">닫기</button>
+    </div>
+</div>
+
+<script>
+    // =========================================================
+    // 위치 확인 설정 (반얀트리 부산 - 기장해안로 370 좌표 적용)
+    // =========================================================
+    const BANYAN_LAT = 35.1953;  
+    const BANYAN_LNG = 129.2268; 
+    const RADIUS = 1000; // 허용 반경 (1000m = 1km)
+
+    // 밀리초 단위 시간 상수
+    const ONE_HOUR = 60 * 60 * 1000; 
+    const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+
+    // 하버사인 공식: 두 위경도 좌표 간의 거리 계산
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; 
+        const p1 = lat1 * Math.PI/180;
+        const p2 = lat2 * Math.PI/180;
+        const dp = (lat2-lat1) * Math.PI/180;
+        const dl = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c; 
+    }
+
+    // 공통 GPS/시간 인증 검사 로직
+    function checkLocationPermission(validTimeMs, storageKey, successCallback, errorMsg) {
+        const lastVisit = localStorage.getItem(storageKey);
+        const now = Date.now();
+
+        if (lastVisit && (now - parseInt(lastVisit)) <= validTimeMs) {
+            successCallback();
+            return;
+        }
+
+        if (!navigator.geolocation) {
+            alert("이 브라우저에서는 위치 정보(GPS)를 지원하지 않습니다.");
+            return;
+        }
+
+        alert("위치를 확인 중입니다. 잠시만 기다려주세요...");
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const distance = getDistance(userLat, userLng, BANYAN_LAT, BANYAN_LNG);
+
+                if (distance <= RADIUS) {
+                    localStorage.setItem(storageKey, now.toString());
+                    successCallback();
+                } else {
+                    alert(errorMsg + `\n(고객님의 현재 위치 거리는 호텔로부터 약 ${Math.round(distance/1000)}km 입니다.)`);
+                }
+            },
+            (error) => {
+                alert("기기의 위치 권한을 허용하셔야만 해당 서비스를 이용하실 수 있습니다.");
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
+
+    // =========================================================
+    // 서비스 기능 로직
+    // =========================================================
+
+    function checkConciergeAccess() {
+        checkLocationPermission(TWELVE_HOURS, 'banyan_concierge_time', () => {
+            openSub('concierge');
+        }, "반얀트리 부산 호텔에 위치하시거나, 위치하신 지 12시간 이내의 고객님만 접근이 가능합니다.");
+    }
+
+    function requestValet() {
+        const carNum = document.getElementById('car-number').value;
+        if(!carNum) { alert("차량 번호를 입력해주세요."); return; }
+        
+        checkLocationPermission(ONE_HOUR, 'banyan_valet_time', () => {
+            alert(`${carNum} 차량의 출차 요청이 시스템으로 전송되었습니다. 호텔 1층에 차량 준비 시키겠습니다.`);
+        }, "호텔 내에 위치하시거나, 위치하신 지 1시간 이내일 때만 발렛 출차 요청이 가능합니다.");
+    }
+
+    function showAuthStep(step) {
+        document.getElementById('auth-main').style.display = 'none';
+        if (step === 'code') {
+            document.getElementById('auth-code').style.display = 'flex';
+        }
+    }
+
+    function loginSuccess(name) {
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+        document.getElementById('user-name').innerText = name;
+    }
+
+    function checkCode() {
+        const val = document.getElementById('access-code').value.trim().toLowerCase();
+        
+        // 추가된 접속 코드 배열
+        const validCodes = ["honors", "honors.", "아너스", "아너스.", "아누스", "아누스."];
+        
+        if (validCodes.includes(val)) {
+            loginSuccess("회원");
+        } else {
+            alert("코드가 일치하지 않습니다.");
+        }
+    }
+
+    function startVoiceRecognition(targetId) {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'ko-KR';
+        recognition.start();
+        recognition.onresult = (event) => {
+            document.getElementById(targetId).value = event.results[0][0].transcript;
+            if(targetId === 'access-code') checkCode();
+        };
+    }
+
+    function openSub(id) { document.getElementById('main-app').style.display='none'; document.getElementById('sub-'+id).style.display='flex'; }
+    function closeSub() { document.querySelectorAll('.sub-screen').forEach(s=>s.style.display='none'); document.getElementById('main-app').style.display='flex'; }
+    function openTour() { document.getElementById('bottom-sheet-overlay').style.display='block'; document.getElementById('bottom-sheet').style.display='block'; }
+    function closeTour() { document.getElementById('bottom-sheet-overlay').style.display='none'; document.getElementById('bottom-sheet').style.display='none'; }
+</script>
+</body>
+</html>
